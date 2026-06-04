@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>龍舌蘭咖啡廳・點餐機</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Noto+Serif+TC:wght@500;600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#0a1310;--night-2:#0f1d17;--panel:#142620;
+    --line:rgba(217,164,65,.18);--agave:#3f8f66;--jade:#62c08c;
+    --gold:#d9a441;--gold-soft:#f1d089;--ember:#d8623a;--ember-soft:#e88a5f;
+    --cream:#f4ead5;--muted:#9fb6a8;--shadow:0 18px 50px -12px rgba(0,0,0,.7);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:"Noto Sans TC",sans-serif;color:var(--cream);background:var(--night);
+    min-height:100vh;line-height:1.6;-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden;}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background-color:var(--night);
+    background-image:
+      radial-gradient(circle at 50% 130%, rgba(63,143,102,.10) 0 22%, transparent 23%),
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(216,98,58,.10), transparent 60%),
+      radial-gradient(circle at 12px 0, transparent 11px, rgba(217,164,65,.045) 12px, transparent 13px),
+      radial-gradient(circle at 0 18px, transparent 11px, rgba(217,164,65,.045) 12px, transparent 13px);
+    background-size:auto, auto, 24px 36px, 24px 36px;background-position:0 0, 0 0, 0 0, 12px 18px;}
+  .wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 18px 90px}
+
+  header.hero{text-align:center;padding:46px 16px 30px;position:relative;}
+  .emblem{width:88px;height:88px;margin:0 auto 14px;filter:drop-shadow(0 4px 14px rgba(216,98,58,.45))}
+  .latin{font-family:"Cinzel",serif;letter-spacing:.52em;font-size:14px;color:var(--gold);
+    text-transform:uppercase;padding-left:.52em;margin-bottom:6px;}
+  h1.shop{font-family:"Noto Serif TC",serif;font-weight:900;font-size:clamp(34px,6vw,56px);
+    letter-spacing:.06em;line-height:1.1;
+    background:linear-gradient(180deg,var(--gold-soft),var(--gold) 55%,var(--ember));
+    -webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 2px 30px rgba(216,98,58,.18);}
+  .tagline{color:var(--muted);font-size:15px;margin-top:10px;letter-spacing:.08em}
+  .tagline .drg{color:var(--jade);font-weight:700}
+  .divider{width:min(420px,80%);height:1px;margin:26px auto 0;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);position:relative;}
+  .divider::after{content:"❖";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    background:var(--night);padding:0 14px;color:var(--gold);font-size:13px;}
+
+  .guestbar{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;
+    background:linear-gradient(180deg,var(--panel),rgba(20,38,32,.4));
+    border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin:14px 0 30px;box-shadow:var(--shadow);}
+  .field{display:flex;flex-direction:column;gap:6px;flex:1;min-width:130px}
+  .field label{font-size:12px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;font-weight:700}
+  .field input{background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:10px;
+    color:var(--cream);padding:11px 13px;font-family:inherit;font-size:15px;transition:.2s;width:100%;}
+  .field input:focus{outline:none;border-color:var(--jade);box-shadow:0 0 0 3px rgba(98,192,140,.16)}
+  .field input::placeholder{color:rgba(159,182,168,.55)}
+
+  .layout{display:grid;grid-template-columns:1fr 360px;gap:26px;align-items:start}
+  @media(max-width:880px){.layout{grid-template-columns:1fr}}
+
+  .cat{margin-bottom:34px}
+  .cat-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .cat-head .ic{font-size:20px;filter:saturate(1.2)}
+  .cat-head h2{font-family:"Noto Serif TC",serif;font-weight:700;font-size:23px;letter-spacing:.05em;color:var(--cream);}
+  .cat-head .en{font-family:"Cinzel",serif;font-size:11px;letter-spacing:.3em;color:var(--gold);margin-top:2px}
+  .cat-head .ln{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+
+  .items{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+  .item{background:linear-gradient(155deg,var(--panel),rgba(15,29,23,.6));
+    border:1px solid var(--line);border-radius:14px;padding:16px;position:relative;overflow:hidden;
+    transition:transform .25s,border-color .25s,box-shadow .25s;}
+  .item::before{content:"";position:absolute;right:-30px;top:-30px;width:80px;height:80px;border-radius:50%;
+    background:radial-gradient(circle,rgba(216,98,58,.16),transparent 70%);opacity:0;transition:.3s;}
+  .item:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 14px 30px -14px rgba(216,98,58,.4)}
+  .item:hover::before{opacity:1}
+  .item .nm{font-family:"Noto Serif TC",serif;font-weight:600;font-size:17px;color:var(--cream);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .item .nm .badge{font-family:"Noto Sans TC",sans-serif;font-weight:500;font-size:10.5px;letter-spacing:.05em;
+    color:var(--ember-soft);border:1px solid var(--ember);background:rgba(216,98,58,.1);
+    padding:2px 7px;border-radius:6px;white-space:nowrap;}
+  .item .desc{color:var(--muted);font-size:12.5px;margin:6px 0 14px;min-height:50px}
+  .item .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .item .price{font-family:"Cinzel",serif;font-size:17px;color:var(--gold-soft);font-weight:600;white-space:nowrap}
+  .item .price::after{content:" Gil";font-size:11px;color:var(--gold);margin-left:2px;font-family:"Noto Sans TC"}
+  .add{background:linear-gradient(135deg,var(--agave),var(--jade));border:none;color:#06120c;
+    font-family:inherit;font-weight:700;font-size:14px;padding:8px 15px;border-radius:9px;cursor:pointer;
+    transition:.2s;letter-spacing:.05em;white-space:nowrap;}
+  .add:hover{filter:brightness(1.1);box-shadow:0 6px 16px -6px rgba(98,192,140,.7)}
+  .add:active{transform:scale(.94)}
+
+  .cart{position:sticky;top:18px;background:linear-gradient(180deg,var(--panel),rgba(10,19,16,.9));
+    border:1px solid var(--gold);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;}
+  .cart-top{padding:18px 20px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(216,98,58,.14),transparent);display:flex;align-items:center;gap:10px;}
+  .cart-top h3{font-family:"Noto Serif TC",serif;font-weight:700;font-size:19px;letter-spacing:.05em}
+  .cart-top .cnt{margin-left:auto;background:var(--ember);color:#1a0d08;font-weight:700;font-size:13px;
+    min-width:24px;height:24px;border-radius:12px;display:grid;place-items:center;padding:0 8px;}
+  .cart-body{max-height:44vh;overflow-y:auto;padding:8px 14px}
+  .cart-body::-webkit-scrollbar{width:6px}
+  .cart-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+  .empty{text-align:center;color:var(--muted);padding:40px 16px;font-size:14px}
+  .empty .dr{font-size:40px;display:block;margin-bottom:10px;opacity:.5}
+  .citem{display:flex;align-items:center;gap:8px;padding:12px 4px;border-bottom:1px dashed var(--line)}
+  .citem:last-child{border-bottom:none}
+  .citem .ci-nm{flex:1;font-size:13.5px;font-weight:500;line-height:1.35}
+  .citem .ci-nm small{display:block;color:var(--gold-soft);font-family:"Cinzel",serif;font-size:11px}
+  .qty{display:flex;align-items:center;gap:5px}
+  .qty button{width:24px;height:24px;border-radius:7px;border:1px solid var(--line);background:rgba(0,0,0,.3);
+    color:var(--cream);cursor:pointer;font-size:15px;line-height:1;transition:.15s;}
+  .qty button:hover{border-color:var(--jade);color:var(--jade)}
+  .qty span{min-width:18px;text-align:center;font-weight:700;font-size:14px}
+  .ci-price{min-width:80px;text-align:right;font-family:"Cinzel",serif;color:var(--gold-soft);font-size:13px;white-space:nowrap}
+  .cart-foot{padding:16px 20px;border-top:1px solid var(--gold)}
+  .minrow{font-size:12.5px;text-align:center;margin-bottom:11px;color:var(--muted);letter-spacing:.03em;line-height:1.5}
+  .minrow.warn{color:var(--ember-soft)}
+  .minrow.ok{color:var(--jade)}
+  .minrow .sub{display:block;font-size:11px;opacity:.75;margin-top:2px}
+  .total-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+  .total-row .lab{font-family:"Noto Serif TC",serif;font-size:16px;color:var(--muted)}
+  .total-row .amt{font-family:"Cinzel",serif;font-weight:700;font-size:26px;color:var(--gold-soft)}
+  .total-row .amt::after{content:" Gil";font-size:14px;color:var(--gold);font-family:"Noto Sans TC"}
+  .send{width:100%;border:none;border-radius:12px;padding:15px;cursor:pointer;
+    font-family:"Noto Serif TC",serif;font-weight:700;font-size:17px;letter-spacing:.12em;color:#1a0d08;
+    background:linear-gradient(135deg,var(--gold),var(--ember));transition:.2s;position:relative;overflow:hidden;}
+  .send:hover:not(:disabled){filter:brightness(1.08);box-shadow:0 10px 26px -8px rgba(216,98,58,.65)}
+  .send:active:not(:disabled){transform:scale(.98)}
+  .send:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.4)}
+  .copybtn{width:100%;margin-top:9px;background:transparent;border:1px solid var(--line);color:var(--muted);
+    border-radius:10px;padding:10px;cursor:pointer;font-family:inherit;font-size:13px;transition:.2s;}
+  .copybtn:hover{color:var(--jade);border-color:var(--jade)}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(calc(100% + 60px));
+    background:var(--night-2);border:1px solid var(--gold);color:var(--cream);
+    padding:14px 22px;border-radius:12px;box-shadow:var(--shadow);z-index:60;font-size:14px;max-width:90%;
+    transition:transform .4s cubic-bezier(.2,1.2,.3,1);font-weight:500;pointer-events:none;}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast.err{border-color:var(--ember)}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:40px;letter-spacing:.1em}
+  footer .h{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <svg class="emblem" viewBox="0 0 100 100" fill="none">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f1d089"/><stop offset=".5" stop-color="#d9a441"/><stop offset="1" stop-color="#d8623a"/>
+      </linearGradient></defs>
+      <path d="M50 92 C46 70 40 58 26 50 C40 52 47 60 50 70 C53 60 60 52 74 50 C60 58 54 70 50 92Z" fill="url(#g)"/>
+      <path d="M50 78 C48 60 44 48 34 38 C46 44 49 54 50 64 C51 54 54 44 66 38 C56 48 52 60 50 78Z" fill="url(#g)" opacity=".85"/>
+      <path d="M50 60 C49 44 47 32 41 22 C47 28 49 38 50 48 C51 38 53 28 59 22 C53 32 51 44 50 60Z" fill="url(#g)" opacity=".7"/>
+      <path d="M33 26 C26 20 22 12 24 6 C30 12 34 18 38 26Z" fill="url(#g)"/>
+      <path d="M67 26 C74 20 78 12 76 6 C70 12 66 18 62 26Z" fill="url(#g)"/>
+      <circle cx="50" cy="32" r="3.4" fill="#d8623a"/>
+    </svg>
+    <div class="latin">Maguey</div>
+    <h1 class="shop">龍舌蘭咖啡廳</h1>
+    <p class="tagline">讓<span class="drg">龍們</span>陪著我們，我們陪著<span class="drg">龍們</span>。</p>
+    <div class="divider"></div>
+  </header>
+
+  <div class="guestbar">
+    <div class="field">
+      <label>角色名 / 暱稱</label>
+      <input id="guestName" placeholder="請留下您的稱呼…">
+    </div>
+  </div>
+
+  <div class="layout">
+    <div id="menu"></div>
+    <aside>
+      <div class="cart">
+        <div class="cart-top">
+          <span style="font-size:20px">🐉</span>
+          <h3>本桌點單</h3>
+          <span class="cnt" id="cnt">0</span>
+        </div>
+        <div class="cart-body" id="cartBody">
+          <div class="empty"><span class="dr">🥃</span>點單還空空的<br>請從左側挑選喜歡的品項</div>
+        </div>
+        <div class="cart-foot">
+          <div class="minrow" id="minRow">低消 10,000 Gil／人</div>
+          <div class="total-row">
+            <span class="lab">應付總額</span>
+            <span class="amt" id="total">0</span>
+          </div>
+          <button class="send" id="sendBtn" disabled>🔥 送出至吧台</button>
+          <button class="copybtn" id="copyBtn">📋 複製點單明細</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>龍舌蘭咖啡廳 · <span class="h">願您的杯中常有龍火相伴</span></footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ====== 設定 ====== */
+const WEBHOOK = "https://discord.com/api/webhooks/1511765859809493112/SVP-XVvoeHHoJwfq0zETlBVA1ZVYzcdjVeq7dYwcb7CTmI29qnhC236GKrC4KJGx8N4U";
+const MIN_SPEND = 10000; // 低消（Gil／人）
+
+/* ====== 菜單資料（可自由增減 / 改價）
+   noMin: true 代表此品項「不列入低消計算」 ====== */
+const MENU = [
+  { cat:"套餐", en:"SET MEALS", ic:"🍽️", items:[
+    { id:"set_dessert", nm:"甜點套餐", desc:"甜點一份＋隨機飲品一杯。甜點依當天廚房心情隨機供應：奇妙芭菲 / 布丁布丁 / 雪頂莫古泡泡冰", price:10000 },
+    { id:"set_full", nm:"吃飽套餐", desc:"主餐一份＋隨機飲品一杯。主餐依當天廚房心情隨機供應：鬆軟鬆餅 / 大河狸漢堡", price:10000 },
+    { id:"set_boss", nm:"店長叫你隨便吃套餐", desc:"主餐＋甜點＋飲料各一份，你愛吃不吃。", price:15000 },
+  ]},
+  { cat:"龍的小零食", en:"DRAGON SNACKS", ic:"🐲", items:[
+    { id:"snack", nm:"店長今日採買", desc:"當天店長採買甚麼回來，各位龍就吃甚麼。（可自選數量）", price:30000, noMin:true },
+  ]},
+];
+
+/* ====== 狀態 ====== */
+const cart = {};
+const FLAT = {};
+MENU.forEach(c=>c.items.forEach(i=>FLAT[i.id]=i));
+const gil = n => n.toLocaleString();
+
+/* ====== 每日訂單編號 ====== */
+let counterCache = null;
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+async function readCounter(){
+  try{ if(window.storage){ const r=await window.storage.get("tequila_counter", true); if(r && r.value) return JSON.parse(r.value); } }catch(e){}
+  return counterCache || { date:todayStr(), count:0 };
+}
+async function writeCounter(data){
+  counterCache = data;
+  try{ if(window.storage) await window.storage.set("tequila_counter", JSON.stringify(data), true); }catch(e){}
+}
+
+/* ====== 記住客人名字（只存在本機瀏覽器，僅自己可見） ====== */
+async function loadGuestName(){
+  let v = null;
+  try{ v = localStorage.getItem("tequila_guest_name"); }catch(e){}
+  if(!v){ try{ if(window.storage){ const r = await window.storage.get("tequila_guest_name", false); if(r && r.value) v = r.value; } }catch(e){} }
+  if(v) document.getElementById("guestName").value = v;
+}
+async function saveGuestName(v){
+  try{ localStorage.setItem("tequila_guest_name", v); }catch(e){}
+  try{ if(window.storage) await window.storage.set("tequila_guest_name", v, false); }catch(e){}
+}
+let _saveTimer = null;
+document.getElementById("guestName").addEventListener("input", e=>{
+  const v = e.target.value.trim();
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(()=>saveGuestName(v), 400);
+});
+
+/* ====== 送單成功音效（即時合成，不需音檔） ====== */
+let _audioCtx = null;
+function getAudioCtx(){
+  if(!_audioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(AC) _audioCtx = new AC();
+  }
+  if(_audioCtx && _audioCtx.state === "suspended") _audioCtx.resume();
+  return _audioCtx;
+}
+function bellTone(ctx, when, freq, dur, vol){
+  // 主音（正弦波，溫暖的鈴聲基底）
+  const o1 = ctx.createOscillator(), g1 = ctx.createGain();
+  o1.type = "sine"; o1.frequency.value = freq;
+  o1.connect(g1); g1.connect(ctx.destination);
+  g1.gain.setValueAtTime(0, when);
+  g1.gain.linearRampToValueAtTime(vol, when + 0.008);
+  g1.gain.exponentialRampToValueAtTime(0.0008, when + dur);
+  o1.start(when); o1.stop(when + dur + 0.05);
+  // 高泛音（給予金屬鈴的「叮」感）
+  const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+  o2.type = "sine"; o2.frequency.value = freq * 2.76;
+  o2.connect(g2); g2.connect(ctx.destination);
+  g2.gain.setValueAtTime(0, when);
+  g2.gain.linearRampToValueAtTime(vol * 0.32, when + 0.005);
+  g2.gain.exponentialRampToValueAtTime(0.0005, when + dur * 0.55);
+  o2.start(when); o2.stop(when + dur);
+}
+function playSuccessChime(){
+  const ctx = getAudioCtx(); if(!ctx) return;
+  const t = ctx.currentTime;
+  // 兩音上行（C6 → G6，輕巧明亮的服務鈴）
+  bellTone(ctx, t,        1046.50, 1.3, 0.22);
+  bellTone(ctx, t + 0.13, 1567.98, 1.5, 0.20);
+}
+
+/* ====== 渲染菜單 ====== */
+const menuEl = document.getElementById("menu");
+MENU.forEach(c=>{
+  const sec = document.createElement("section");
+  sec.className="cat";
+  sec.innerHTML = `<div class="cat-head"><span class="ic">${c.ic}</span>
+      <div><h2>${c.cat}</h2><div class="en">${c.en}</div></div><div class="ln"></div></div>
+      <div class="items">${c.items.map(i=>`
+        <div class="item">
+          <div class="nm">${i.nm}${i.noMin?'<span class="badge">不列入低消</span>':''}</div>
+          <div class="desc">${i.desc}</div>
+          <div class="row"><span class="price">${gil(i.price)}</span>
+          <button class="add" data-id="${i.id}">＋ 加入</button></div>
+        </div>`).join("")}</div>`;
+  menuEl.appendChild(sec);
+});
+menuEl.addEventListener("click", e=>{
+  const b = e.target.closest(".add"); if(!b) return;
+  const id = b.dataset.id; cart[id] = (cart[id]||0)+1; renderCart();
+  toast(`已加入「${FLAT[id].nm}」`);
+});
+
+/* ====== 渲染點單 ====== */
+function renderCart(){
+  const body = document.getElementById("cartBody");
+  const ids = Object.keys(cart).filter(id=>cart[id]>0);
+  let total=0, qualifying=0, count=0, hasExcluded=false;
+  ids.forEach(id=>{
+    const it=FLAT[id], sub=it.price*cart[id];
+    total += sub; count += cart[id];
+    if(it.noMin) hasExcluded = true;
+    else qualifying += sub;
+  });
+  if(!ids.length){
+    body.innerHTML = `<div class="empty"><span class="dr">🥃</span>點單還空空的<br>請從左側挑選喜歡的品項</div>`;
+  }else{
+    body.innerHTML = ids.map(id=>{
+      const it=FLAT[id], sub=it.price*cart[id];
+      return `<div class="citem">
+        <div class="ci-nm">${it.nm}<small>${gil(it.price)} Gil${it.noMin?' · 不列入低消':''}</small></div>
+        <div class="qty"><button data-d="${id}">−</button><span>${cart[id]}</span><button data-i="${id}">＋</button></div>
+        <div class="ci-price">${gil(sub)} Gil</div>
+      </div>`;
+    }).join("");
+  }
+  document.getElementById("total").textContent = gil(total);
+  document.getElementById("cnt").textContent = count;
+
+  const reached = qualifying >= MIN_SPEND;
+  const minRow = document.getElementById("minRow");
+  const note = hasExcluded ? `<span class="sub">（店長今日採買不列入低消）</span>` : "";
+  if(total === 0){
+    minRow.className="minrow";
+    minRow.innerHTML = `低消 ${gil(MIN_SPEND)} Gil／人`;
+  }else if(!reached){
+    minRow.className="minrow warn";
+    minRow.innerHTML = `還差 ${gil(MIN_SPEND-qualifying)} Gil 才達低消（${gil(MIN_SPEND)} Gil／人）${note}`;
+  }else{
+    minRow.className="minrow ok";
+    minRow.innerHTML = `✓ 已達低消 ${gil(MIN_SPEND)} Gil／人${note}`;
+  }
+  document.getElementById("sendBtn").disabled = !ids.length || !reached;
+}
+document.getElementById("cartBody").addEventListener("click", e=>{
+  const inc=e.target.dataset.i, dec=e.target.dataset.d;
+  if(inc){ cart[inc]++; renderCart(); }
+  if(dec){ cart[dec]--; if(cart[dec]<=0) delete cart[dec]; renderCart(); }
+});
+
+/* ====== 組成訂單 ====== */
+function buildOrder(){
+  const name = document.getElementById("guestName").value.trim() || "（未具名客人）";
+  const ids = Object.keys(cart).filter(id=>cart[id]>0);
+  let total=0;
+  const lines = ids.map(id=>{ const it=FLAT[id], sub=it.price*cart[id]; total+=sub;
+    return `• ${it.nm} × ${cart[id]} ＝ ${gil(sub)} Gil`; });
+  return { name, lines, total,
+    text:`🐉 龍舌蘭咖啡廳・新訂單\n客人：${name}\n──────────\n${lines.join("\n")}\n──────────\n💰 應付總額：${gil(total)} Gil` };
+}
+
+/* ====== 送出至 Discord ====== */
+document.getElementById("sendBtn").addEventListener("click", async ()=>{
+  const o = buildOrder();
+  // 二次驗算低消（防止使用者繞過按鈕）
+  let qualifying = 0;
+  Object.keys(cart).forEach(id=>{ if(!FLAT[id].noMin) qualifying += FLAT[id].price * cart[id]; });
+  if(qualifying < MIN_SPEND){ toast(`未達低消 ${gil(MIN_SPEND)} Gil／人`,"err"); return; }
+
+  const btn = document.getElementById("sendBtn"); btn.disabled=true; const old=btn.textContent; btn.textContent="🔥 傳送中…";
+
+  const today = todayStr();
+  const cur = await readCounter();
+  const orderNo = ((cur.date===today)? cur.count : 0) + 1;
+
+  const payload = {
+    username:"龍舌蘭點餐系統", avatar_url:"https://twemoji.maxcdn.com/v/latest/72x72/1f409.png",
+    embeds:[{ title:`🐉 新訂單進來囉 — 今日第 ${orderNo} 張`, color:0xd8623a,
+      fields:[
+        { name:"🧾 訂單編號", value:`今日第 ${orderNo} 張（${today}）`, inline:true },
+        { name:"🧑 客人", value:o.name, inline:true },
+        { name:"📜 餐點明細", value:o.lines.join("\n") || "—" },
+        { name:"💰 應付總額", value:`**${gil(o.total)} Gil**` }
+      ],
+      footer:{ text:"龍舌蘭咖啡廳 Maguey · 讓龍們陪著我們，我們陪著龍們" }, timestamp:new Date().toISOString() }]
+  };
+  try{
+    const res = await fetch(WEBHOOK, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) });
+    if(res.ok){
+      await writeCounter({ date:today, count:orderNo });
+      playSuccessChime();
+      toast(`✅ 今日第 ${orderNo} 張已送達吧台，共 ${gil(o.total)} Gil，請稍候龍男為您送上`);
+      for(const k in cart) delete cart[k]; renderCart();
+    }else{ toast("送出失敗，請稍後再試或改用「複製點單明細」","err"); }
+  }catch(err){ toast("連線失敗，可改用「複製點單明細」貼到群組","err"); }
+  btn.textContent=old; renderCart();
+});
+
+/* ====== 複製明細 ====== */
+document.getElementById("copyBtn").addEventListener("click", async ()=>{
+  const ids = Object.keys(cart).filter(id=>cart[id]>0);
+  if(!ids.length){ toast("點單還是空的喔","err"); return; }
+  const o = buildOrder();
+  try{ await navigator.clipboard.writeText(o.text); toast("📋 點單明細已複製"); }catch(e){ toast("複製失敗，請手動選取","err"); }
+});
+
+/* ====== Toast ====== */
+let tT;
+function toast(msg, type){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.className="toast show"+(type==="err"?" err":"");
+  clearTimeout(tT); tT=setTimeout(()=>t.className="toast",3200);
+}
+
+loadGuestName();
+renderCart();
+</script>
+</body>
+</html>
