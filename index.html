@@ -131,12 +131,158 @@
     transition:transform .4s cubic-bezier(.2,1.2,.3,1);font-weight:500;pointer-events:none;}
   .toast.show{transform:translateX(-50%) translateY(0)}
   .toast.err{border-color:var(--ember)}
+
+  /* 點單確認視窗 */
+  .cmask{position:fixed;inset:0;background:rgba(4,8,6,.82);backdrop-filter:blur(6px);z-index:70;
+    display:none;place-items:center;padding:18px;animation:fade .3s ease;}
+  .cmask.on{display:grid}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes pop{from{opacity:0;transform:scale(.92) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  .cmodal{background:linear-gradient(180deg,var(--night-2),var(--panel));
+    border:1px solid var(--gold);border-radius:20px;max-width:460px;width:100%;
+    padding:28px 26px;text-align:center;animation:pop .42s cubic-bezier(.2,1.3,.4,1);
+    box-shadow:0 22px 60px -10px rgba(216,98,58,.42),var(--shadow);}
+  .cmodal .icon{width:62px;height:62px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;
+    font-size:30px;background:linear-gradient(135deg,var(--gold),var(--ember));
+    box-shadow:0 8px 24px -6px rgba(216,98,58,.55),inset 0 -3px 8px rgba(0,0,0,.2);}
+  .cmodal h3{font-family:"Noto Serif TC",serif;font-weight:700;font-size:22px;letter-spacing:.05em;margin-bottom:6px;
+    background:linear-gradient(180deg,var(--gold-soft),var(--gold));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .cmodal .sub{color:var(--muted);font-size:13.5px;line-height:1.65;margin-bottom:18px}
+  .cmodal .obox{background:rgba(0,0,0,.32);border:1px dashed var(--line);border-radius:12px;
+    padding:12px 16px;margin-bottom:14px;text-align:left;max-height:160px;overflow-y:auto;}
+  .cmodal .obox::-webkit-scrollbar{width:5px}
+  .cmodal .obox::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+  .cmodal .oline{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:13.5px;line-height:1.4;}
+  .cmodal .oline+.oline{border-top:1px dashed rgba(217,164,65,.1)}
+  .cmodal .oline .lnm{flex:1;color:var(--cream)}
+  .cmodal .oline .lpr{color:var(--gold-soft);font-family:"Cinzel",serif;white-space:nowrap}
+  .cmodal .tbox{background:linear-gradient(135deg,rgba(217,164,65,.16),rgba(216,98,58,.08));
+    border:1px solid var(--gold);border-radius:12px;padding:13px;margin-bottom:16px;}
+  .cmodal .tbox .lab{font-family:"Noto Serif TC",serif;font-size:13px;color:var(--muted);display:block;margin-bottom:3px;letter-spacing:.05em}
+  .cmodal .tbox .amt{font-family:"Cinzel",serif;font-weight:700;font-size:32px;
+    background:linear-gradient(180deg,var(--gold-soft),var(--ember));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .cmodal .tbox .amt::after{content:" Gil";font-size:16px;font-family:"Noto Sans TC";color:var(--gold);-webkit-text-fill-color:var(--gold)}
+  .cmodal .note{background:rgba(63,143,102,.12);border:1px solid rgba(98,192,140,.32);border-radius:10px;
+    padding:12px 14px;margin-bottom:20px;font-size:13px;color:var(--cream);line-height:1.6;text-align:left;
+    display:flex;gap:9px;align-items:flex-start;}
+  .cmodal .note .icn{font-size:17px;flex-shrink:0;line-height:1.3}
+  .cmodal .note b{color:var(--jade);font-weight:600}
+  .cmodal .okbtn{width:100%;border:none;border-radius:12px;padding:14px;cursor:pointer;
+    font-family:"Noto Serif TC",serif;font-weight:700;font-size:16px;letter-spacing:.12em;color:#06120c;
+    background:linear-gradient(135deg,var(--agave),var(--jade));transition:.2s;}
+  .cmodal .okbtn:hover{filter:brightness(1.1);box-shadow:0 8px 22px -8px rgba(98,192,140,.6)}
+  .cmodal .okbtn:active{transform:scale(.98)}
+
+  /* ===== STAFF 後台 ===== */
+  .staff-entry{position:fixed;bottom:14px;right:14px;z-index:40;
+    background:rgba(0,0,0,.5);border:1px solid rgba(217,164,65,.28);color:var(--muted);
+    font-family:"Cinzel",serif;font-size:11px;letter-spacing:.22em;padding:7px 13px;border-radius:8px;
+    cursor:pointer;transition:.2s;backdrop-filter:blur(4px);}
+  .staff-entry:hover{color:var(--gold);border-color:var(--gold);background:rgba(217,164,65,.1)}
+  .staff-view{display:none}
+  .staff-view.on{display:block}
+
+  .staff-bar{display:flex;justify-content:space-between;align-items:center;gap:14px;
+    background:linear-gradient(180deg,var(--panel),rgba(20,38,32,.4));
+    border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin:30px 0 24px;box-shadow:var(--shadow);}
+  .staff-bar .ttl{display:flex;flex-direction:column;gap:2px}
+  .staff-bar .ttl .en{font-family:"Cinzel",serif;letter-spacing:.32em;font-size:11px;color:var(--gold)}
+  .staff-bar .ttl b{font-family:"Noto Serif TC",serif;font-weight:700;color:var(--cream);font-size:16px;letter-spacing:.06em}
+  .back-btn{background:transparent;border:1px solid var(--line);color:var(--muted);
+    padding:9px 16px;border-radius:9px;cursor:pointer;font-family:inherit;font-size:13px;transition:.2s;white-space:nowrap;}
+  .back-btn:hover{color:var(--jade);border-color:var(--jade)}
+
+  .conn{font-family:"Cinzel",serif;font-size:11px;letter-spacing:.15em;padding:6px 12px;border-radius:7px;
+    border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  .conn.ok{color:var(--jade);border-color:rgba(98,192,140,.45);background:rgba(98,192,140,.07)}
+  .conn.warn{color:var(--ember-soft);border-color:rgba(216,98,58,.45);background:rgba(216,98,58,.07)}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:28px}
+  .stat{background:linear-gradient(155deg,var(--panel),rgba(15,29,23,.7));border:1px solid var(--line);
+    border-radius:14px;padding:18px;transition:.2s;}
+  .stat .lab{font-size:11.5px;letter-spacing:.16em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;font-weight:700}
+  .stat .val{font-family:"Cinzel",serif;font-weight:700;font-size:24px;color:var(--cream);line-height:1.1}
+  .stat .val .u{font-size:12px;color:var(--gold);margin-left:4px;font-family:"Noto Sans TC";font-weight:500}
+  .stat.meal{border-color:rgba(98,192,140,.35)} .stat.meal .val{color:var(--jade)}
+  .stat.snack{border-color:rgba(216,98,58,.4)} .stat.snack .val{color:var(--ember-soft)}
+  .stat.total{border-color:var(--gold);background:linear-gradient(155deg,rgba(217,164,65,.12),rgba(216,98,58,.05))}
+  .stat.total .val{background:linear-gradient(180deg,var(--gold-soft),var(--ember));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+
+  .section{margin-bottom:28px}
+  .section h3{font-family:"Noto Serif TC",serif;font-weight:700;font-size:17px;margin-bottom:13px;color:var(--cream);
+    display:flex;align-items:center;gap:10px}
+  .section h3::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+
+  .order-list{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .order-row{display:grid;grid-template-columns:60px 1fr 110px 70px;gap:12px;padding:13px 16px;
+    border-bottom:1px dashed var(--line);align-items:center;font-size:13.5px;transition:.2s}
+  .order-row:last-child{border-bottom:none}
+  .order-row.head{background:rgba(0,0,0,.32);color:var(--gold);font-weight:700;font-size:11px;
+    letter-spacing:.14em;text-transform:uppercase;padding-top:11px;padding-bottom:11px}
+  .order-row .o-time{color:var(--muted);font-family:"Cinzel",serif;font-size:12.5px}
+  .order-row .o-cust{font-weight:600;color:var(--cream);margin-bottom:3px}
+  .order-row .o-items{color:var(--muted);font-size:12px;line-height:1.5}
+  .order-row .o-amt{font-family:"Cinzel",serif;color:var(--gold-soft);text-align:right;white-space:nowrap}
+  .order-row .o-amt::after{content:" Gil";font-size:10.5px;color:var(--gold);font-family:"Noto Sans TC";margin-left:2px}
+  .order-row .o-claim{text-align:center}
+  .claim-chk{width:22px;height:22px;cursor:pointer;accent-color:var(--jade)}
+  .order-row.claimed{opacity:.5}
+  .order-row.claimed .o-cust{text-decoration:line-through;color:var(--muted)}
+  .order-empty{padding:44px 20px;text-align:center;color:var(--muted);font-size:13.5px}
+
+  .sales-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+  .sales-item{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-size:14px;transition:.2s}
+  .sales-item:hover{border-color:var(--gold)}
+  .sales-item .nm{color:var(--cream)}
+  .sales-item .ct{font-family:"Cinzel",serif;color:var(--gold-soft);font-weight:700;font-size:18px}
+  .sales-item .ct::after{content:" 份";font-size:11px;color:var(--gold);font-family:"Noto Sans TC";margin-left:2px;font-weight:500}
+
+  .salary-box{background:var(--panel);border:1px solid var(--gold);border-radius:14px;padding:20px}
+  .salary-inputs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+  @media(max-width:520px){.salary-inputs{grid-template-columns:1fr}}
+  .salary-inputs label{font-size:11.5px;color:var(--gold);letter-spacing:.14em;font-weight:700;
+    display:block;margin-bottom:6px;text-transform:uppercase}
+  .salary-inputs input{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:9px;
+    color:var(--cream);padding:11px 13px;font-family:inherit;font-size:15px;transition:.2s}
+  .salary-inputs input:focus{outline:none;border-color:var(--jade);box-shadow:0 0 0 3px rgba(98,192,140,.16)}
+  .salary-result{background:linear-gradient(135deg,rgba(217,164,65,.14),rgba(216,98,58,.06));
+    border:1px solid var(--gold);border-radius:10px;padding:16px;text-align:center}
+  .salary-result .lab{color:var(--muted);font-size:13px;margin-bottom:5px;display:block;letter-spacing:.06em}
+  .salary-result .amt{font-family:"Cinzel",serif;font-weight:700;font-size:30px;
+    background:linear-gradient(180deg,var(--gold-soft),var(--ember));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .salary-result .amt::after{content:" Gil";font-size:14px;font-family:"Noto Sans TC";color:var(--gold);-webkit-text-fill-color:var(--gold)}
+  .salary-note{font-size:11.5px;color:var(--muted);margin-top:10px;text-align:center;letter-spacing:.05em}
+
+  /* 登入彈窗 */
+  .lmask{position:fixed;inset:0;background:rgba(4,8,6,.82);backdrop-filter:blur(6px);z-index:75;
+    display:none;place-items:center;padding:18px;animation:fade .3s ease}
+  .lmask.on{display:grid}
+  .lmodal{background:var(--night-2);border:1px solid var(--gold);border-radius:18px;max-width:380px;width:100%;
+    padding:28px 26px;box-shadow:var(--shadow);animation:pop .42s cubic-bezier(.2,1.3,.4,1);}
+  .lmodal h3{font-family:"Noto Serif TC",serif;font-size:21px;color:var(--gold-soft);margin-bottom:6px;text-align:center;letter-spacing:.04em}
+  .lmodal .lsub{color:var(--muted);font-size:13px;text-align:center;margin-bottom:18px}
+  .lmodal input{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:10px;
+    color:var(--cream);padding:12px 14px;font-family:inherit;font-size:15px;margin-bottom:8px;letter-spacing:.1em}
+  .lmodal input:focus{outline:none;border-color:var(--jade)}
+  .lmodal .lerr{color:var(--ember-soft);font-size:12.5px;text-align:center;margin-bottom:10px;min-height:16px}
+  .lmodal .lbtns{display:flex;gap:10px;margin-top:6px}
+  .lmodal .lbtns button{flex:1;padding:12px;border-radius:10px;cursor:pointer;font-family:inherit;font-weight:700;border:none;transition:.2s;font-size:14px}
+  .lcancel{background:transparent;border:1px solid var(--line)!important;color:var(--muted)}
+  .lcancel:hover{color:var(--cream)}
+  .llogin{background:linear-gradient(135deg,var(--gold),var(--ember));color:#06120c}
+  .llogin:hover{filter:brightness(1.08)}
+
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:40px;letter-spacing:.1em}
   footer .h{color:var(--gold)}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" id="customerWrap">
 
   <header class="hero">
     <svg class="emblem" viewBox="0 0 100 100" fill="none">
@@ -193,10 +339,125 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+<!-- 點單確認視窗 -->
+<div class="cmask" id="cmask">
+  <div class="cmodal">
+    <div class="icon">🐉</div>
+    <h3>點單已送至吧台</h3>
+    <p class="sub">龍男們收到了！以下是您的訂單明細，請過目確認。</p>
+    <div class="obox" id="cmList"></div>
+    <div class="tbox">
+      <span class="lab">應付總額</span>
+      <span class="amt" id="cmTotal">0</span>
+    </div>
+    <div class="note">
+      <span class="icn">💰</span>
+      <div>請將餐點費用<b>交給門外的店員</b>，再麻煩客人前往<b>店內吧台找非龍店員取餐</b>！</div>
+    </div>
+    <button class="okbtn" id="cmOk">✦ 我知道了</button>
+  </div>
+</div>
+
+<!-- STAFF ONLY 入口 -->
+<button class="staff-entry" id="staffEntry">⚙ STAFF ONLY</button>
+
+<!-- 後台主體 -->
+<div class="wrap staff-view" id="staffWrap">
+  <div class="staff-bar">
+    <div class="ttl">
+      <span class="en">STAFF DASHBOARD</span>
+      <b>🐉 龍舌蘭咖啡廳 · 後台</b>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="conn" id="connStatus">⋯</span>
+      <button class="back-btn" id="backBtn">← 返回客人模式</button>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat meal"><div class="lab">餐點收入</div><div class="val" id="stMealRev">0<span class="u">Gil</span></div></div>
+    <div class="stat snack"><div class="lab">零食收入</div><div class="val" id="stSnackRev">0<span class="u">Gil</span></div></div>
+    <div class="stat total"><div class="lab">今日總收入</div><div class="val" id="stTotalRev">0<span class="u">Gil</span></div></div>
+    <div class="stat"><div class="lab">今日訂單數</div><div class="val" id="stOrderCnt">0<span class="u">張</span></div></div>
+  </div>
+
+  <div class="section">
+    <h3>📋 今日訂單</h3>
+    <div class="order-list" id="orderList">
+      <div class="order-empty">尚未有訂單</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>📊 銷售統計</h3>
+    <div class="sales-grid" id="salesGrid"></div>
+  </div>
+
+  <div class="section">
+    <h3>💰 薪資計算</h3>
+    <div class="salary-box">
+      <div class="salary-inputs">
+        <div>
+          <label>薪資池（Gil）</label>
+          <input id="salaryPool" type="number" min="0" placeholder="預設＝今日餐點收入">
+        </div>
+        <div>
+          <label>店員人數</label>
+          <input id="staffCount" type="number" min="1" value="1">
+        </div>
+      </div>
+      <div class="salary-result">
+        <span class="lab">每位店員可領</span>
+        <span class="amt" id="salaryPerStaff">0</span>
+      </div>
+      <div class="salary-note">公式：薪資池 ÷ 店員人數（薪資池可手動調整）</div>
+    </div>
+  </div>
+</div>
+
+<!-- 登入彈窗 -->
+<div class="lmask" id="lmask">
+  <div class="lmodal">
+    <h3>🔒 STAFF ONLY</h3>
+    <p class="lsub">請輸入後台密碼</p>
+    <input id="loginPw" type="password" placeholder="密碼" autocomplete="off">
+    <div class="lerr" id="loginErr"></div>
+    <div class="lbtns">
+      <button class="lcancel" id="loginCancel">取消</button>
+      <button class="llogin" id="loginBtn">登入</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, query, where, orderBy, onSnapshot, Timestamp }
+  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+/* ====== Firebase 設定 ======
+   1. 到 https://console.firebase.google.com 建立專案
+   2. 啟用 Firestore Database（建議地區：asia-east1 台灣 / asia-northeast1 東京）
+   3. 專案設定 → Your apps → 新增 Web App → 把 firebaseConfig 整段貼過來取代下方 */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+let db = null;
+const FIREBASE_OK = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("YOUR_");
+if(FIREBASE_OK){
+  try{ db = getFirestore(initializeApp(firebaseConfig)); }
+  catch(e){ console.error("Firebase 初始化失敗：", e); db = null; }
+}
+
 /* ====== 設定 ====== */
 const WEBHOOK = "https://discord.com/api/webhooks/1511765859809493112/SVP-XVvoeHHoJwfq0zETlBVA1ZVYzcdjVeq7dYwcb7CTmI29qnhC236GKrC4KJGx8N4U";
 const MIN_SPEND = 10000; // 低消（Gil／人）
+const STAFF_PASSWORD = "maguey2026"; // 後台密碼，請改成你想用的
 
 /* ====== 菜單資料（可自由增減 / 改價）
    noMin: true 代表此品項「不列入低消計算」 ====== */
@@ -216,18 +477,6 @@ const cart = {};
 const FLAT = {};
 MENU.forEach(c=>c.items.forEach(i=>FLAT[i.id]=i));
 const gil = n => n.toLocaleString();
-
-/* ====== 每日訂單編號 ====== */
-let counterCache = null;
-function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
-async function readCounter(){
-  try{ if(window.storage){ const r=await window.storage.get("tequila_counter", true); if(r && r.value) return JSON.parse(r.value); } }catch(e){}
-  return counterCache || { date:todayStr(), count:0 };
-}
-async function writeCounter(data){
-  counterCache = data;
-  try{ if(window.storage) await window.storage.set("tequila_counter", JSON.stringify(data), true); }catch(e){}
-}
 
 /* ====== 記住客人名字（只存在本機瀏覽器，僅自己可見） ====== */
 async function loadGuestName(){
@@ -373,15 +622,10 @@ document.getElementById("sendBtn").addEventListener("click", async ()=>{
 
   const btn = document.getElementById("sendBtn"); btn.disabled=true; const old=btn.textContent; btn.textContent="🔥 傳送中…";
 
-  const today = todayStr();
-  const cur = await readCounter();
-  const orderNo = ((cur.date===today)? cur.count : 0) + 1;
-
   const payload = {
     username:"龍舌蘭點餐系統", avatar_url:"https://twemoji.maxcdn.com/v/latest/72x72/1f409.png",
-    embeds:[{ title:`🐉 新訂單進來囉 — 今日第 ${orderNo} 張`, color:0xd8623a,
+    embeds:[{ title:"🐉 新訂單進來囉", color:0xd8623a,
       fields:[
-        { name:"🧾 訂單編號", value:`今日第 ${orderNo} 張（${today}）`, inline:true },
         { name:"🧑 客人", value:o.name, inline:true },
         { name:"📜 餐點明細", value:o.lines.join("\n") || "—" },
         { name:"💰 應付總額", value:`**${gil(o.total)} Gil**` }
@@ -391,13 +635,42 @@ document.getElementById("sendBtn").addEventListener("click", async ()=>{
   try{
     const res = await fetch(WEBHOOK, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) });
     if(res.ok){
-      await writeCounter({ date:today, count:orderNo });
+      // 將訂單寫入本機儲存，供後台查閱
+      const items = Object.keys(cart).filter(id=>cart[id]>0).map(id=>{
+        const it = FLAT[id];
+        return { id, nm:it.nm, qty:cart[id], price:it.price, sub:it.price*cart[id], noMin:!!it.noMin };
+      });
+      let mealTot=0, snackTot=0;
+      items.forEach(i=>{ if(i.noMin) snackTot+=i.sub; else mealTot+=i.sub; });
+      await addOrder({
+        id: "ord_" + Date.now() + "_" + Math.random().toString(36).slice(2,7),
+        time: new Date().toISOString(),
+        customer: o.name,
+        items, total: o.total, mealTotal: mealTot, snackTotal: snackTot,
+        claimed: false, updated: Date.now()
+      });
       playSuccessChime();
-      toast(`✅ 今日第 ${orderNo} 張已送達吧台，共 ${gil(o.total)} Gil，請稍候龍男為您送上`);
-      for(const k in cart) delete cart[k]; renderCart();
+      showConfirmModal();
     }else{ toast("送出失敗，請稍後再試或改用「複製點單明細」","err"); }
   }catch(err){ toast("連線失敗，可改用「複製點單明細」貼到群組","err"); }
   btn.textContent=old; renderCart();
+});
+
+/* ====== 點單確認視窗 ====== */
+function showConfirmModal(){
+  const ids = Object.keys(cart).filter(id=>cart[id]>0);
+  let total = 0;
+  document.getElementById("cmList").innerHTML = ids.map(id=>{
+    const it = FLAT[id], sub = it.price * cart[id]; total += sub;
+    return `<div class="oline"><span class="lnm">${it.nm} × ${cart[id]}</span><span class="lpr">${gil(sub)} Gil</span></div>`;
+  }).join("");
+  document.getElementById("cmTotal").textContent = gil(total);
+  document.getElementById("cmask").classList.add("on");
+}
+document.getElementById("cmOk").addEventListener("click", ()=>{
+  document.getElementById("cmask").classList.remove("on");
+  for(const k in cart) delete cart[k];
+  renderCart();
 });
 
 /* ====== 複製明細 ====== */
@@ -415,6 +688,198 @@ function toast(msg, type){
   t.textContent=msg; t.className="toast show"+(type==="err"?" err":"");
   clearTimeout(tT); tT=setTimeout(()=>t.className="toast",3200);
 }
+
+/* ====== 訂單儲存（Firestore 為主，本機為備援） ====== */
+const ORDERS_KEY = "tequila_orders_v1";
+
+async function addOrder(order){
+  if(db){
+    try{
+      const now = new Date();
+      const { id, ...rest } = order;
+      await addDoc(collection(db, "orders"), {
+        ...rest, time: Timestamp.fromDate(now), timeISO: now.toISOString()
+      });
+      return;
+    }catch(e){ console.error("Firestore 寫入失敗，改存本機：", e); }
+  }
+  const orders = await loadOrdersLocal();
+  orders.push(order);
+  await saveOrdersLocal(orders);
+}
+
+async function patchOrder(id, patch){
+  if(db){
+    try{ await updateDoc(doc(db, "orders", id), { ...patch, updated: Date.now() }); return; }
+    catch(e){ console.error("Firestore 更新失敗：", e); }
+  }
+  const orders = await loadOrdersLocal();
+  const idx = orders.findIndex(o=>o.id===id);
+  if(idx>=0){ orders[idx] = {...orders[idx], ...patch, updated:Date.now()}; await saveOrdersLocal(orders); }
+}
+
+async function loadOrdersLocal(){
+  let stored=[], local=[];
+  try{ if(window.storage){ const r=await window.storage.get(ORDERS_KEY, true); if(r && r.value) stored=JSON.parse(r.value); } }catch(e){}
+  try{ const v=localStorage.getItem(ORDERS_KEY); if(v) local=JSON.parse(v); }catch(e){}
+  const merged={};
+  [...stored, ...local].forEach(o=>{
+    const k=o.id; if(!k) return;
+    if(!merged[k] || (o.updated||0)>(merged[k].updated||0)) merged[k]=o;
+  });
+  return Object.values(merged).sort((a,b)=>(b.time||"").localeCompare(a.time||""));
+}
+async function saveOrdersLocal(orders){
+  const json = JSON.stringify(orders);
+  try{ localStorage.setItem(ORDERS_KEY, json); }catch(e){}
+  try{ if(window.storage) await window.storage.set(ORDERS_KEY, json, true); }catch(e){}
+}
+
+/* ====== STAFF 登入流程 ====== */
+const lmask = document.getElementById("lmask");
+document.getElementById("staffEntry").addEventListener("click", ()=>{
+  document.getElementById("loginPw").value="";
+  document.getElementById("loginErr").textContent="";
+  lmask.classList.add("on");
+  setTimeout(()=>document.getElementById("loginPw").focus(), 100);
+});
+document.getElementById("loginCancel").addEventListener("click", ()=>lmask.classList.remove("on"));
+lmask.addEventListener("click", e=>{ if(e.target===lmask) lmask.classList.remove("on"); });
+document.getElementById("loginPw").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+document.getElementById("loginBtn").addEventListener("click", doLogin);
+function doLogin(){
+  const pw = document.getElementById("loginPw").value;
+  if(pw === STAFF_PASSWORD){
+    lmask.classList.remove("on");
+    enterStaffMode();
+  }else{
+    document.getElementById("loginErr").textContent = "密碼錯誤";
+    document.getElementById("loginPw").value = "";
+  }
+}
+function enterStaffMode(){
+  document.getElementById("customerWrap").style.display = "none";
+  document.getElementById("staffWrap").classList.add("on");
+  document.getElementById("staffEntry").style.display = "none";
+  window.scrollTo(0,0);
+  startOrdersFeed();
+}
+function exitStaffMode(){
+  stopOrdersFeed();
+  document.getElementById("customerWrap").style.display = "";
+  document.getElementById("staffWrap").classList.remove("on");
+  document.getElementById("staffEntry").style.display = "";
+  window.scrollTo(0,0);
+}
+document.getElementById("backBtn").addEventListener("click", exitStaffMode);
+
+/* ====== 後台渲染（Firestore 即時監聽 / 本機備援） ====== */
+function todayLocalDate(){
+  const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+let unsubOrders = null;
+function startOrdersFeed(){
+  stopOrdersFeed();
+  const conn = document.getElementById("connStatus");
+  if(db){
+    conn.textContent = "● 雲端同步中"; conn.className = "conn ok";
+    const start = new Date(); start.setHours(0,0,0,0);
+    const q = query(
+      collection(db, "orders"),
+      where("time", ">=", Timestamp.fromDate(start)),
+      orderBy("time", "desc")
+    );
+    unsubOrders = onSnapshot(q, snap=>{
+      const orders = [];
+      snap.forEach(d=>{
+        const data = d.data();
+        const t = data.time;
+        const timeISO = (t && typeof t.toDate === "function") ? t.toDate().toISOString() : (data.timeISO || "");
+        orders.push({ ...data, id: d.id, time: timeISO });
+      });
+      renderStaffWithOrders(orders);
+    }, err=>{
+      console.error("Firestore 監聽失敗：", err);
+      conn.textContent = "⚠ 後端連線失敗"; conn.className = "conn warn";
+      loadLocalForStaff();
+    });
+  }else{
+    conn.textContent = "⚠ 本機模式（未設定 Firebase）"; conn.className = "conn warn";
+    loadLocalForStaff();
+  }
+}
+function stopOrdersFeed(){
+  if(unsubOrders){ unsubOrders(); unsubOrders = null; }
+}
+async function loadLocalForStaff(){
+  const orders = await loadOrdersLocal();
+  const today = todayLocalDate();
+  const todayOrders = orders.filter(o => (o.time||"").slice(0,10) === today);
+  renderStaffWithOrders(todayOrders);
+}
+
+function renderStaffWithOrders(todayOrders){
+  // 收入統計
+  let meal=0, snack=0;
+  const itemCounts = {};
+  todayOrders.forEach(o=>{
+    meal += o.mealTotal || 0;
+    snack += o.snackTotal || 0;
+    (o.items||[]).forEach(it=>{ itemCounts[it.id] = (itemCounts[it.id]||0) + (it.qty||0); });
+  });
+  document.getElementById("stMealRev").innerHTML = `${gil(meal)} <span class="u">Gil</span>`;
+  document.getElementById("stSnackRev").innerHTML = `${gil(snack)} <span class="u">Gil</span>`;
+  document.getElementById("stTotalRev").innerHTML = `${gil(meal+snack)} <span class="u">Gil</span>`;
+  document.getElementById("stOrderCnt").innerHTML = `${todayOrders.length} <span class="u">張</span>`;
+
+  // 訂單列表
+  const list = document.getElementById("orderList");
+  if(!todayOrders.length){
+    list.innerHTML = '<div class="order-empty">今天還沒有訂單。客人送單後會自動列在這裡。</div>';
+  }else{
+    list.innerHTML = '<div class="order-row head"><div>時間</div><div>客人 / 餐點</div><div style="text-align:right">金額</div><div>取餐</div></div>' +
+      todayOrders.map(o=>{
+        const tt = new Date(o.time);
+        const tstr = String(tt.getHours()).padStart(2,'0')+':'+String(tt.getMinutes()).padStart(2,'0');
+        const items = (o.items||[]).map(i=>`${i.nm} ×${i.qty}`).join('、');
+        return `<div class="order-row ${o.claimed?'claimed':''}" data-id="${o.id}">
+          <div class="o-time">${tstr}</div>
+          <div><div class="o-cust">${escapeHtml(o.customer)||'（未具名）'}</div><div class="o-items">${items}</div></div>
+          <div class="o-amt">${gil(o.total)}</div>
+          <div class="o-claim"><input type="checkbox" class="claim-chk" ${o.claimed?'checked':''} data-id="${o.id}"></div>
+        </div>`;
+      }).join('');
+  }
+
+  // 銷售統計
+  const sales = document.getElementById("salesGrid");
+  const allItems = [];
+  MENU.forEach(c=>c.items.forEach(i=>allItems.push(i)));
+  sales.innerHTML = allItems.map(i=>
+    `<div class="sales-item"><span class="nm">${i.nm}</span><span class="ct">${itemCounts[i.id]||0}</span></div>`
+  ).join('');
+
+  // 薪資池預設帶入今日餐點收入
+  const poolInput = document.getElementById("salaryPool");
+  if(poolInput.dataset.touched !== "1"){ poolInput.value = meal; }
+  recalcSalary();
+}
+function escapeHtml(s){ return String(s||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function recalcSalary(){
+  const pool = parseInt(document.getElementById("salaryPool").value) || 0;
+  const staff = Math.max(1, parseInt(document.getElementById("staffCount").value) || 1);
+  document.getElementById("salaryPerStaff").textContent = gil(Math.floor(pool / staff));
+}
+document.getElementById("salaryPool").addEventListener("input", e=>{ e.target.dataset.touched="1"; recalcSalary(); });
+document.getElementById("staffCount").addEventListener("input", recalcSalary);
+
+// 取餐勾選
+document.getElementById("orderList").addEventListener("change", async e=>{
+  const chk = e.target.closest(".claim-chk"); if(!chk) return;
+  await patchOrder(chk.dataset.id, { claimed: chk.checked });
+  if(!db) loadLocalForStaff(); // 雲端模式由監聽自動刷新
+});
 
 loadGuestName();
 renderCart();
