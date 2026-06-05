@@ -430,21 +430,18 @@
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getFirestore, collection, addDoc, doc, updateDoc, query, where, orderBy, onSnapshot, Timestamp }
-  from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+  from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
-/* ====== Firebase 設定 ======
-   1. 到 https://console.firebase.google.com 建立專案
-   2. 啟用 Firestore Database（建議地區：asia-east1 台灣 / asia-northeast1 東京）
-   3. 專案設定 → Your apps → 新增 Web App → 把 firebaseConfig 整段貼過來取代下方 */
+/* ====== Firebase 設定 ====== */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBJNa0R_XvtIATiBzlnQ0TapLNIlIg4J6I",
+  authDomain: "maguey-cafe.firebaseapp.com",
+  projectId: "maguey-cafe",
+  storageBucket: "maguey-cafe.firebasestorage.app",
+  messagingSenderId: "822902238112",
+  appId: "1:822902238112:web:adc54ddff2025e2713d2c5"
 };
 
 let db = null;
