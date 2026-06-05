@@ -51,6 +51,8 @@
     color:var(--cream);padding:11px 13px;font-family:inherit;font-size:15px;transition:.2s;width:100%;}
   .field input:focus{outline:none;border-color:var(--jade);box-shadow:0 0 0 3px rgba(98,192,140,.16)}
   .field input::placeholder{color:rgba(159,182,168,.55)}
+  .field input.required-empty{border-color:rgba(216,98,58,.55);background:rgba(216,98,58,.06);
+    box-shadow:0 0 0 3px rgba(216,98,58,.08)}
 
   .layout{display:grid;grid-template-columns:1fr 360px;gap:26px;align-items:start}
   @media(max-width:880px){.layout{grid-template-columns:1fr}}
@@ -491,6 +493,7 @@ document.getElementById("guestName").addEventListener("input", e=>{
   const v = e.target.value.trim();
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(()=>saveGuestName(v), 400);
+  renderCart();
 });
 
 /* ====== 送單成功音效（即時合成，不需音檔） ====== */
@@ -578,11 +581,17 @@ function renderCart(){
   document.getElementById("cnt").textContent = count;
 
   const reached = qualifying >= MIN_SPEND;
+  const nameInput = document.getElementById("guestName");
+  const hasName = nameInput.value.trim().length > 0;
+  nameInput.classList.toggle("required-empty", ids.length > 0 && !hasName);
   const minRow = document.getElementById("minRow");
   const note = hasExcluded ? `<span class="sub">（店長今日採買不列入低消）</span>` : "";
   if(total === 0){
     minRow.className="minrow";
     minRow.innerHTML = `低消 ${gil(MIN_SPEND)} Gil／人`;
+  }else if(!hasName){
+    minRow.className="minrow warn";
+    minRow.innerHTML = `請先在上方輸入角色名 / 暱稱`;
   }else if(!reached){
     minRow.className="minrow warn";
     minRow.innerHTML = `還差 ${gil(MIN_SPEND-qualifying)} Gil 才達低消（${gil(MIN_SPEND)} Gil／人）${note}`;
@@ -590,7 +599,7 @@ function renderCart(){
     minRow.className="minrow ok";
     minRow.innerHTML = `✓ 已達低消 ${gil(MIN_SPEND)} Gil／人${note}`;
   }
-  document.getElementById("sendBtn").disabled = !ids.length || !reached;
+  document.getElementById("sendBtn").disabled = !ids.length || !reached || !hasName;
 }
 document.getElementById("cartBody").addEventListener("click", e=>{
   const inc=e.target.dataset.i, dec=e.target.dataset.d;
@@ -611,6 +620,13 @@ function buildOrder(){
 
 /* ====== 送出至 Discord ====== */
 document.getElementById("sendBtn").addEventListener("click", async ()=>{
+  const nameRaw = document.getElementById("guestName").value.trim();
+  if(!nameRaw){
+    toast("請先輸入角色名 / 暱稱","err");
+    document.getElementById("guestName").focus();
+    renderCart();
+    return;
+  }
   const o = buildOrder();
   // 二次驗算低消（防止使用者繞過按鈕）
   let qualifying = 0;
