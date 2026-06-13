@@ -42,6 +42,32 @@
   .divider::after{content:"❖";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
     background:var(--night);padding:0 14px;color:var(--gold);font-size:13px;}
 
+  /* 公休橫條（客人端） */
+  .closed-banner{display:none;background:linear-gradient(135deg,rgba(216,98,58,.16),rgba(217,164,65,.08));
+    border:1px solid var(--ember);border-radius:14px;padding:18px 22px;margin:14px 0 26px;
+    text-align:center;box-shadow:var(--shadow);}
+  .closed-banner.show{display:block}
+  .closed-banner .ic{font-size:30px;margin-bottom:8px;display:block}
+  .closed-banner h3{font-family:"Noto Serif TC",serif;font-weight:700;font-size:19px;color:var(--ember-soft);margin-bottom:6px;letter-spacing:.04em}
+  .closed-banner p{color:var(--muted);font-size:13.5px;line-height:1.7}
+  .menu-disabled{opacity:.35;pointer-events:none;filter:saturate(.4)}
+
+  /* 後台：營業狀態開關 */
+  .biz-toggle{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.28);
+    border:1px solid var(--line);border-radius:10px;padding:8px 14px;}
+  .biz-toggle .lab{font-size:12.5px;color:var(--muted);letter-spacing:.05em;white-space:nowrap}
+  .switch{position:relative;width:46px;height:25px;flex-shrink:0}
+  .switch input{opacity:0;width:0;height:0}
+  .switch .slider{position:absolute;cursor:pointer;inset:0;background:rgba(98,192,140,.5);
+    border-radius:25px;transition:.25s;border:1px solid var(--line)}
+  .switch .slider::before{content:"";position:absolute;width:19px;height:19px;left:2px;top:2px;
+    background:var(--cream);border-radius:50%;transition:.25s;box-shadow:0 2px 5px rgba(0,0,0,.3)}
+  .switch input:checked + .slider{background:rgba(216,98,58,.65);border-color:var(--ember)}
+  .switch input:checked + .slider::before{transform:translateX(21px)}
+  .biz-toggle .state{font-family:"Noto Serif TC",serif;font-weight:700;font-size:13px;min-width:60px;text-align:center}
+  .biz-toggle .state.open{color:var(--jade)}
+  .biz-toggle .state.closed{color:var(--ember-soft)}
+
   .guestbar{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;
     background:linear-gradient(180deg,var(--panel),rgba(20,38,32,.4));
     border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin:14px 0 30px;box-shadow:var(--shadow);}
@@ -219,7 +245,7 @@
   .section h3::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
 
   .order-list{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  .order-row{display:grid;grid-template-columns:60px 1fr 110px 60px 44px;gap:12px;padding:13px 16px;
+  .order-row{display:grid;grid-template-columns:60px 1fr 110px 60px 44px 44px;gap:12px;padding:13px 16px;
     border-bottom:1px dashed var(--line);align-items:center;font-size:13.5px;transition:.2s}
   .order-row:last-child{border-bottom:none}
   .order-row.head{background:rgba(0,0,0,.32);color:var(--gold);font-weight:700;font-size:11px;
@@ -255,6 +281,46 @@
   .del-confirm .yes{color:var(--ember-soft);border-color:var(--ember)}
   .del-confirm .yes:hover{background:rgba(216,98,58,.15)}
   .del-confirm .no:hover{color:var(--cream)}
+
+  /* 訂單品項編輯彈窗 */
+  .oemask{position:fixed;inset:0;background:rgba(4,8,6,.82);backdrop-filter:blur(6px);z-index:80;
+    display:none;place-items:center;padding:18px;animation:fade .3s ease}
+  .oemask.on{display:grid}
+  .oemodal{background:linear-gradient(180deg,var(--night-2),var(--panel));border:1px solid var(--gold);
+    border-radius:18px;max-width:520px;width:100%;padding:24px;box-shadow:var(--shadow);
+    animation:pop .42s cubic-bezier(.2,1.3,.4,1);max-height:88vh;overflow-y:auto;}
+  .oemodal::-webkit-scrollbar{width:6px}
+  .oemodal::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+  .oemodal h3{font-family:"Noto Serif TC",serif;font-weight:700;font-size:19px;color:var(--gold-soft);
+    margin-bottom:4px;letter-spacing:.04em}
+  .oemodal .oe-cust{color:var(--muted);font-size:13px;margin-bottom:16px}
+  .oemodal .oe-cust b{color:var(--cream)}
+  .oe-section-lab{font-size:11px;letter-spacing:.16em;color:var(--gold);text-transform:uppercase;
+    font-weight:700;margin:14px 0 8px}
+  .oe-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line)}
+  .oe-row:last-child{border-bottom:none}
+  .oe-row .oe-nm{flex:1;font-size:13.5px;color:var(--cream)}
+  .oe-row .oe-nm small{display:block;color:var(--gold-soft);font-family:"Cinzel",serif;font-size:11px}
+  .oe-row .qty button{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);
+    background:rgba(0,0,0,.3);color:var(--cream);cursor:pointer;font-size:15px;line-height:1;transition:.15s}
+  .oe-row .qty button:hover{border-color:var(--jade);color:var(--jade)}
+  .oe-row .qty span{min-width:22px;text-align:center;font-weight:700;font-size:14px;display:inline-block}
+  .oe-row .oe-sub{min-width:78px;text-align:right;font-family:"Cinzel",serif;color:var(--gold-soft);font-size:13px;white-space:nowrap}
+  .oe-row .oe-sub::after{content:" Gil";font-size:10px;color:var(--gold);font-family:"Noto Sans TC"}
+  .oe-empty{color:var(--muted);font-size:12.5px;padding:6px 0}
+  .oe-total{background:linear-gradient(135deg,rgba(217,164,65,.14),rgba(216,98,58,.06));
+    border:1px solid var(--gold);border-radius:10px;padding:13px 16px;margin:16px 0;
+    display:flex;justify-content:space-between;align-items:center}
+  .oe-total .lab{font-family:"Noto Serif TC",serif;font-size:14px;color:var(--muted)}
+  .oe-total .amt{font-family:"Cinzel",serif;font-weight:700;font-size:24px;color:var(--gold-soft)}
+  .oe-total .amt::after{content:" Gil";font-size:13px;color:var(--gold);font-family:"Noto Sans TC"}
+  .oe-btns{display:flex;gap:10px}
+  .oe-btns button{flex:1;padding:12px;border-radius:10px;cursor:pointer;font-family:inherit;font-weight:700;
+    border:none;transition:.2s;font-size:14px}
+  .oe-save{background:linear-gradient(135deg,var(--agave),var(--jade));color:#06120c}
+  .oe-save:hover{filter:brightness(1.08)}
+  .oe-cancel{background:transparent;border:1px solid var(--line)!important;color:var(--muted)}
+  .oe-cancel:hover{color:var(--cream)}
 
   .sales-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
   .sales-item{background:var(--panel);border:1px solid var(--line);border-radius:10px;
@@ -325,6 +391,12 @@
     <div class="divider"></div>
   </header>
 
+  <div class="closed-banner" id="closedBanner">
+    <span class="ic">🌙</span>
+    <h3>本日暫不營業</h3>
+    <p>龍舌蘭咖啡廳今日休息，點餐機暫不接單。<br>歡迎關注公告，期待下次與您和龍們相見 🐉</p>
+  </div>
+
   <div class="guestbar">
     <div class="field">
       <label>角色名 / 暱稱</label>
@@ -332,7 +404,7 @@
     </div>
   </div>
 
-  <div class="layout">
+  <div class="layout" id="orderLayout">
     <div id="menu"></div>
     <aside>
       <div class="cart">
@@ -391,7 +463,15 @@
       <span class="en">STAFF DASHBOARD</span>
       <b>🐉 龍舌蘭咖啡廳 · 後台</b>
     </div>
-    <div style="display:flex;align-items:center;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div class="biz-toggle">
+        <span class="lab">今日營業狀態</span>
+        <label class="switch">
+          <input type="checkbox" id="closedToggle">
+          <span class="slider"></span>
+        </label>
+        <span class="state open" id="bizState">營業中</span>
+      </div>
       <span class="conn" id="connStatus">⋯</span>
       <button class="back-btn" id="backBtn">← 返回客人模式</button>
     </div>
@@ -452,9 +532,33 @@
   </div>
 </div>
 
+<!-- 訂單品項編輯彈窗 -->
+<div class="oemask" id="oemask">
+  <div class="oemodal">
+    <h3>🍽 修改訂單餐點</h3>
+    <p class="oe-cust">客人：<b id="oeCustName">—</b></p>
+
+    <div class="oe-section-lab">目前餐點</div>
+    <div id="oeCurrentItems"></div>
+
+    <div class="oe-section-lab">加入其他品項</div>
+    <div id="oeAddItems"></div>
+
+    <div class="oe-total">
+      <span class="lab">修改後總額</span>
+      <span class="amt" id="oeTotal">0</span>
+    </div>
+
+    <div class="oe-btns">
+      <button class="oe-cancel" id="oeCancel">取消</button>
+      <button class="oe-save" id="oeSave">儲存修改</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, Timestamp }
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, setDoc, getDoc, query, where, orderBy, onSnapshot, Timestamp }
   from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 /* ====== Firebase 設定 ====== */
@@ -499,6 +603,14 @@ MENU.forEach(c=>c.items.forEach(i=>FLAT[i.id]=i));
 const gil = n => n.toLocaleString();
 
 /* ====== 記住客人名字（只存在本機瀏覽器，僅自己可見） ====== */
+const MIN_MET_KEY = "tequila_min_met";
+function todayKey(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function hasMetMinToday(){
+  try{ return localStorage.getItem(MIN_MET_KEY) === todayKey(); }catch(e){ return false; }
+}
+function markMinMetToday(){
+  try{ localStorage.setItem(MIN_MET_KEY, todayKey()); }catch(e){}
+}
 async function loadGuestName(){
   let v = null;
   try{ v = localStorage.getItem("tequila_guest_name"); }catch(e){}
@@ -577,6 +689,10 @@ menuEl.addEventListener("click", e=>{
 
 /* ====== 渲染點單 ====== */
 function renderCart(){
+  if(typeof storeClosed !== "undefined" && storeClosed){
+    document.getElementById("sendBtn").disabled = true;
+    return;
+  }
   const body = document.getElementById("cartBody");
   const ids = Object.keys(cart).filter(id=>cart[id]>0);
   let total=0, qualifying=0, count=0, hasExcluded=false;
@@ -602,6 +718,8 @@ function renderCart(){
   document.getElementById("cnt").textContent = count;
 
   const reached = qualifying >= MIN_SPEND;
+  const topUp = hasMetMinToday(); // 今日此裝置已達低消，視為加點
+  const passMin = reached || topUp;
   const nameInput = document.getElementById("guestName");
   const hasName = nameInput.value.trim().length > 0;
   nameInput.classList.toggle("required-empty", ids.length > 0 && !hasName);
@@ -609,18 +727,23 @@ function renderCart(){
   const note = hasExcluded ? `<span class="sub">（店長今日採買不列入低消）</span>` : "";
   if(total === 0){
     minRow.className="minrow";
-    minRow.innerHTML = `低消 ${gil(MIN_SPEND)} Gil／人`;
+    minRow.innerHTML = topUp
+      ? `低消 ${gil(MIN_SPEND)} Gil／人<span class="sub">✓ 今日已達低消，可直接加點</span>`
+      : `低消 ${gil(MIN_SPEND)} Gil／人`;
   }else if(!hasName){
     minRow.className="minrow warn";
     minRow.innerHTML = `請先在上方輸入角色名 / 暱稱`;
-  }else if(!reached){
+  }else if(!passMin){
     minRow.className="minrow warn";
     minRow.innerHTML = `還差 ${gil(MIN_SPEND-qualifying)} Gil 才達低消（${gil(MIN_SPEND)} Gil／人）${note}`;
-  }else{
+  }else if(reached){
     minRow.className="minrow ok";
     minRow.innerHTML = `✓ 已達低消 ${gil(MIN_SPEND)} Gil／人${note}`;
+  }else{
+    minRow.className="minrow ok";
+    minRow.innerHTML = `✓ 加點模式・今日已達低消資格${note}`;
   }
-  document.getElementById("sendBtn").disabled = !ids.length || !reached || !hasName;
+  document.getElementById("sendBtn").disabled = !ids.length || !passMin || !hasName;
 }
 document.getElementById("cartBody").addEventListener("click", e=>{
   const inc=e.target.dataset.i, dec=e.target.dataset.d;
@@ -641,6 +764,7 @@ function buildOrder(){
 
 /* ====== 送出至 Discord ====== */
 document.getElementById("sendBtn").addEventListener("click", async ()=>{
+  if(storeClosed){ toast("本日暫不營業，無法送出點單","err"); return; }
   const nameRaw = document.getElementById("guestName").value.trim();
   if(!nameRaw){
     toast("請先輸入角色名 / 暱稱","err");
@@ -649,10 +773,11 @@ document.getElementById("sendBtn").addEventListener("click", async ()=>{
     return;
   }
   const o = buildOrder();
-  // 二次驗算低消（防止使用者繞過按鈕）
+  // 二次驗算低消（防止使用者繞過按鈕）；今日已達低消過則視為加點，可放行
   let qualifying = 0;
   Object.keys(cart).forEach(id=>{ if(!FLAT[id].noMin) qualifying += FLAT[id].price * cart[id]; });
-  if(qualifying < MIN_SPEND){ toast(`未達低消 ${gil(MIN_SPEND)} Gil／人`,"err"); return; }
+  if(qualifying < MIN_SPEND && !hasMetMinToday()){ toast(`未達低消 ${gil(MIN_SPEND)} Gil／人`,"err"); return; }
+  if(qualifying >= MIN_SPEND) markMinMetToday();
 
   const btn = document.getElementById("sendBtn"); btn.disabled=true; const old=btn.textContent; btn.textContent="🔥 傳送中…";
 
@@ -722,6 +847,65 @@ function toast(msg, type){
   t.textContent=msg; t.className="toast show"+(type==="err"?" err":"");
   clearTimeout(tT); tT=setTimeout(()=>t.className="toast",3200);
 }
+
+/* ====== 營業狀態（公休開關，Firestore 為主 / 本機為備援） ====== */
+const SETTINGS_KEY = "tequila_settings_v1";
+let storeClosed = false;
+
+function applyClosedState(closed){
+  storeClosed = closed;
+  const banner = document.getElementById("closedBanner");
+  const layout = document.getElementById("orderLayout");
+  banner.classList.toggle("show", closed);
+  layout.classList.toggle("menu-disabled", closed);
+  if(closed){
+    document.getElementById("sendBtn").disabled = true;
+  }else{
+    renderCart();
+  }
+}
+
+let unsubSettings = null;
+function startSettingsFeed(){
+  if(db){
+    try{
+      unsubSettings = onSnapshot(doc(db, "settings", "store"), snap=>{
+        const closed = snap.exists() ? !!snap.data().closed : false;
+        applyClosedState(closed);
+        const toggle = document.getElementById("closedToggle");
+        if(toggle) toggle.checked = closed;
+        updateBizStateLabel(closed);
+      }, err=>{ console.error("營業狀態監聽失敗：", err); loadClosedLocal(); });
+      return;
+    }catch(e){ console.error(e); }
+  }
+  loadClosedLocal();
+}
+async function loadClosedLocal(){
+  let closed = false;
+  try{ const v = localStorage.getItem(SETTINGS_KEY); if(v) closed = JSON.parse(v).closed; }catch(e){}
+  applyClosedState(closed);
+  const toggle = document.getElementById("closedToggle");
+  if(toggle) toggle.checked = closed;
+  updateBizStateLabel(closed);
+}
+async function setClosedState(closed){
+  if(db){
+    try{ await setDoc(doc(db, "settings", "store"), { closed, updated: Date.now() }, { merge: true }); return; }
+    catch(e){ console.error("營業狀態寫入失敗：", e); }
+  }
+  try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify({ closed })); }catch(e){}
+  applyClosedState(closed);
+}
+function updateBizStateLabel(closed){
+  const el = document.getElementById("bizState");
+  if(!el) return;
+  el.textContent = closed ? "今日公休" : "營業中";
+  el.className = "state " + (closed ? "closed" : "open");
+}
+document.getElementById("closedToggle").addEventListener("change", e=>{
+  setClosedState(e.target.checked);
+});
 
 /* ====== 訂單儲存（Firestore 為主，本機為備援） ====== */
 const ORDERS_KEY = "tequila_orders_v1";
@@ -883,7 +1067,7 @@ function renderStaffWithOrders(todayOrders){
   if(!todayOrders.length){
     list.innerHTML = '<div class="order-empty">今天還沒有訂單。客人送單後會自動列在這裡。</div>';
   }else{
-    list.innerHTML = '<div class="order-row head"><div>時間</div><div>客人 / 餐點</div><div style="text-align:right">金額</div><div>取餐</div><div>刪除</div></div>' +
+    list.innerHTML = '<div class="order-row head"><div>時間</div><div>客人 / 餐點</div><div style="text-align:right">金額</div><div>取餐</div><div>編輯</div><div>刪除</div></div>' +
       todayOrders.map(o=>{
         const tt = new Date(o.time);
         const tstr = String(tt.getHours()).padStart(2,'0')+':'+String(tt.getMinutes()).padStart(2,'0');
@@ -893,6 +1077,9 @@ function renderStaffWithOrders(todayOrders){
           <div><div class="o-cust" data-cust="${o.id}"><span class="cname">${escapeHtml(o.customer)||'（未具名）'}</span><button class="edit-btn" data-edit="${o.id}" title="修改客人名稱">✎</button></div><div class="o-items">${items}</div></div>
           <div class="o-amt">${gil(o.total)}</div>
           <div class="o-claim"><input type="checkbox" class="claim-chk" ${o.claimed?'checked':''} data-id="${o.id}"></div>
+          <div class="o-edit">
+            <button class="del-btn" data-edit-order="${o.id}" title="修改餐點">🍽</button>
+          </div>
           <div class="o-del">
             <button class="del-btn" data-del="${o.id}" title="刪除這筆訂單">🗑</button>
           </div>
@@ -998,7 +1185,109 @@ document.getElementById("orderList").addEventListener("click", async e=>{
   }
 });
 
+// 開啟「修改訂單餐點」彈窗
+document.getElementById("orderList").addEventListener("click", e=>{
+  const btn = e.target.closest("[data-edit-order]");
+  if(!btn) return;
+  const id = btn.dataset.editOrder;
+  const order = (window.__lastOrders||[]).find(o=>o.id===id);
+  if(order) openOrderEditor(order);
+});
+
+/* ====== 訂單品項編輯彈窗 ====== */
+let _oeOrderId = null;
+let _oeItems = {}; // id -> qty
+
+function openOrderEditor(order){
+  _oeOrderId = order.id;
+  _oeItems = {};
+  (order.items||[]).forEach(it=>{ _oeItems[it.id] = it.qty; });
+  document.getElementById("oeCustName").textContent = order.customer || "（未具名）";
+  renderOrderEditor();
+  document.getElementById("oemask").classList.add("on");
+}
+function closeOrderEditor(){
+  document.getElementById("oemask").classList.remove("on");
+  _oeOrderId = null; _oeItems = {};
+}
+function renderOrderEditor(){
+  const curBox = document.getElementById("oeCurrentItems");
+  const addBox = document.getElementById("oeAddItems");
+  const ids = Object.keys(_oeItems).filter(id=>_oeItems[id]>0);
+  let total = 0;
+
+  if(!ids.length){
+    curBox.innerHTML = '<div class="oe-empty">目前沒有任何餐點。</div>';
+  }else{
+    curBox.innerHTML = ids.map(id=>{
+      const it = FLAT[id]; if(!it) return '';
+      const sub = it.price * _oeItems[id]; total += sub;
+      return `<div class="oe-row">
+        <div class="oe-nm">${it.nm}<small>${gil(it.price)} Gil${it.noMin?' · 不列入低消':''}</small></div>
+        <div class="qty"><button data-oe-d="${id}">−</button><span>${_oeItems[id]}</span><button data-oe-i="${id}">＋</button></div>
+        <div class="oe-sub">${gil(sub)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // 還未加入的品項（依菜單分類）
+  const notAdded = [];
+  MENU.forEach(c=>c.items.forEach(i=>{ if(!_oeItems[i.id]) notAdded.push(i); }));
+  if(!notAdded.length){
+    addBox.innerHTML = '<div class="oe-empty">所有品項都已在訂單中。</div>';
+  }else{
+    addBox.innerHTML = notAdded.map(it=>`
+      <div class="oe-row">
+        <div class="oe-nm">${it.nm}<small>${gil(it.price)} Gil${it.noMin?' · 不列入低消':''}</small></div>
+        <div class="oe-sub" style="min-width:auto"></div>
+        <button class="del-btn" data-oe-add="${it.id}" title="加入此品項" style="width:30px;height:30px">＋</button>
+      </div>`).join('');
+  }
+
+  // 計入未顯示在「目前餐點」但已存在於 _oeItems 中且 qty>0 已含上方，total 已算
+  document.getElementById("oeTotal").textContent = gil(total);
+}
+document.getElementById("oeCurrentItems").addEventListener("click", e=>{
+  const inc = e.target.closest("[data-oe-i]");
+  const dec = e.target.closest("[data-oe-d]");
+  if(inc){ _oeItems[inc.dataset.oeI] = (_oeItems[inc.dataset.oeI]||0) + 1; renderOrderEditor(); }
+  if(dec){
+    const id = dec.dataset.oeD;
+    _oeItems[id] = (_oeItems[id]||0) - 1;
+    if(_oeItems[id] <= 0) delete _oeItems[id];
+    renderOrderEditor();
+  }
+});
+document.getElementById("oeAddItems").addEventListener("click", e=>{
+  const addBtn = e.target.closest("[data-oe-add]");
+  if(!addBtn) return;
+  _oeItems[addBtn.dataset.oeAdd] = 1;
+  renderOrderEditor();
+});
+document.getElementById("oeCancel").addEventListener("click", closeOrderEditor);
+document.getElementById("oemask").addEventListener("click", e=>{
+  if(e.target.id === "oemask") closeOrderEditor();
+});
+document.getElementById("oeSave").addEventListener("click", async ()=>{
+  if(!_oeOrderId) return;
+  const ids = Object.keys(_oeItems).filter(id=>_oeItems[id]>0);
+  const items = ids.map(id=>{
+    const it = FLAT[id];
+    return { id, nm: it.nm, qty: _oeItems[id], price: it.price, sub: it.price*_oeItems[id], noMin: !!it.noMin };
+  });
+  let total=0, mealTotal=0, snackTotal=0;
+  items.forEach(i=>{ total += i.sub; if(i.noMin) snackTotal += i.sub; else mealTotal += i.sub; });
+  const btn = document.getElementById("oeSave");
+  const old = btn.textContent; btn.textContent = "儲存中…"; btn.disabled = true;
+  await patchOrder(_oeOrderId, { items, total, mealTotal, snackTotal });
+  btn.textContent = old; btn.disabled = false;
+  closeOrderEditor();
+  if(!db) loadLocalForStaff();
+  toast("✅ 訂單餐點已更新");
+});
+
 loadGuestName();
+startSettingsFeed();
 renderCart();
 </script>
 </body>
