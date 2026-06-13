@@ -219,7 +219,7 @@
   .section h3::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
 
   .order-list{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  .order-row{display:grid;grid-template-columns:60px 1fr 110px 70px;gap:12px;padding:13px 16px;
+  .order-row{display:grid;grid-template-columns:60px 1fr 110px 60px 44px;gap:12px;padding:13px 16px;
     border-bottom:1px dashed var(--line);align-items:center;font-size:13.5px;transition:.2s}
   .order-row:last-child{border-bottom:none}
   .order-row.head{background:rgba(0,0,0,.32);color:var(--gold);font-weight:700;font-size:11px;
@@ -234,6 +234,15 @@
   .order-row.claimed{opacity:.5}
   .order-row.claimed .o-cust{text-decoration:line-through;color:var(--muted)}
   .order-empty{padding:44px 20px;text-align:center;color:var(--muted);font-size:13.5px}
+  .del-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.25);
+    color:var(--muted);cursor:pointer;font-size:14px;transition:.2s;display:grid;place-items:center;margin:0 auto}
+  .del-btn:hover{color:var(--ember-soft);border-color:var(--ember);background:rgba(216,98,58,.1)}
+  .del-confirm{display:flex;gap:5px;justify-content:center;align-items:center}
+  .del-confirm button{font-size:11px;padding:5px 8px;border-radius:6px;border:1px solid var(--line);
+    background:rgba(0,0,0,.25);color:var(--muted);cursor:pointer;font-family:inherit;transition:.2s;white-space:nowrap}
+  .del-confirm .yes{color:var(--ember-soft);border-color:var(--ember)}
+  .del-confirm .yes:hover{background:rgba(216,98,58,.15)}
+  .del-confirm .no:hover{color:var(--cream)}
 
   .sales-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
   .sales-item{background:var(--panel);border:1px solid var(--line);border-radius:10px;
@@ -433,7 +442,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, query, where, orderBy, onSnapshot, Timestamp }
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, Timestamp }
   from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 /* ====== Firebase 設定 ====== */
@@ -456,7 +465,7 @@ if(FIREBASE_OK){
 /* ====== 設定 ====== */
 const WEBHOOK = "https://discord.com/api/webhooks/1511765859809493112/SVP-XVvoeHHoJwfq0zETlBVA1ZVYzcdjVeq7dYwcb7CTmI29qnhC236GKrC4KJGx8N4U";
 const MIN_SPEND = 10000; // 低消（Gil／人）
-const STAFF_PASSWORD = "maguey2026"; // 後台密碼，請改成你想用的
+const STAFF_PASSWORD = "1234"; // 後台密碼，請改成你想用的
 
 /* ====== 菜單資料（可自由增減 / 改價）
    noMin: true 代表此品項「不列入低消計算」 ====== */
@@ -731,6 +740,15 @@ async function patchOrder(id, patch){
   if(idx>=0){ orders[idx] = {...orders[idx], ...patch, updated:Date.now()}; await saveOrdersLocal(orders); }
 }
 
+async function deleteOrder(id){
+  if(db){
+    try{ await deleteDoc(doc(db, "orders", id)); return; }
+    catch(e){ console.error("Firestore 刪除失敗：", e); }
+  }
+  const orders = await loadOrdersLocal();
+  await saveOrdersLocal(orders.filter(o=>o.id!==id));
+}
+
 async function loadOrdersLocal(){
   let stored=[], local=[];
   try{ if(window.storage){ const r=await window.storage.get(ORDERS_KEY, true); if(r && r.value) stored=JSON.parse(r.value); } }catch(e){}
@@ -851,7 +869,7 @@ function renderStaffWithOrders(todayOrders){
   if(!todayOrders.length){
     list.innerHTML = '<div class="order-empty">今天還沒有訂單。客人送單後會自動列在這裡。</div>';
   }else{
-    list.innerHTML = '<div class="order-row head"><div>時間</div><div>客人 / 餐點</div><div style="text-align:right">金額</div><div>取餐</div></div>' +
+    list.innerHTML = '<div class="order-row head"><div>時間</div><div>客人 / 餐點</div><div style="text-align:right">金額</div><div>取餐</div><div>刪除</div></div>' +
       todayOrders.map(o=>{
         const tt = new Date(o.time);
         const tstr = String(tt.getHours()).padStart(2,'0')+':'+String(tt.getMinutes()).padStart(2,'0');
@@ -861,6 +879,9 @@ function renderStaffWithOrders(todayOrders){
           <div><div class="o-cust">${escapeHtml(o.customer)||'（未具名）'}</div><div class="o-items">${items}</div></div>
           <div class="o-amt">${gil(o.total)}</div>
           <div class="o-claim"><input type="checkbox" class="claim-chk" ${o.claimed?'checked':''} data-id="${o.id}"></div>
+          <div class="o-del">
+            <button class="del-btn" data-del="${o.id}" title="刪除這筆訂單">🗑</button>
+          </div>
         </div>`;
       }).join('');
   }
@@ -892,6 +913,36 @@ document.getElementById("orderList").addEventListener("change", async e=>{
   const chk = e.target.closest(".claim-chk"); if(!chk) return;
   await patchOrder(chk.dataset.id, { claimed: chk.checked });
   if(!db) loadLocalForStaff(); // 雲端模式由監聽自動刷新
+});
+
+// 刪除訂單（兩段式確認，避免手滑誤刪）
+document.getElementById("orderList").addEventListener("click", async e=>{
+  const delBtn = e.target.closest("[data-del]");
+  const yesBtn = e.target.closest("[data-del-yes]");
+  const noBtn = e.target.closest("[data-del-no]");
+
+  if(delBtn){
+    const cell = delBtn.parentElement;
+    cell.innerHTML = `<div class="del-confirm">
+      <span style="color:var(--muted);font-size:11px">刪除？</span>
+      <button class="yes" data-del-yes="${delBtn.dataset.del}">是</button>
+      <button class="no" data-del-no="1">否</button>
+    </div>`;
+    return;
+  }
+  if(yesBtn){
+    await deleteOrder(yesBtn.dataset.delYes);
+    if(!db) loadLocalForStaff();
+    return;
+  }
+  if(noBtn){
+    if(!db) loadLocalForStaff(); else { /* 雲端模式：手動還原此格 */ 
+      const cell = noBtn.closest(".o-del");
+      const row = noBtn.closest(".order-row");
+      cell.innerHTML = `<button class="del-btn" data-del="${row.dataset.id}" title="刪除這筆訂單">🗑</button>`;
+    }
+    return;
+  }
 });
 
 loadGuestName();
