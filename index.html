@@ -225,8 +225,20 @@
   .order-row.head{background:rgba(0,0,0,.32);color:var(--gold);font-weight:700;font-size:11px;
     letter-spacing:.14em;text-transform:uppercase;padding-top:11px;padding-bottom:11px}
   .order-row .o-time{color:var(--muted);font-family:"Cinzel",serif;font-size:12.5px}
-  .order-row .o-cust{font-weight:600;color:var(--cream);margin-bottom:3px}
+  .order-row .o-cust{font-weight:600;color:var(--cream);margin-bottom:3px;display:flex;align-items:center;gap:7px}
   .order-row .o-items{color:var(--muted);font-size:12px;line-height:1.5}
+  .edit-btn{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:12px;
+    padding:1px 4px;border-radius:5px;transition:.15s;line-height:1}
+  .edit-btn:hover{color:var(--gold);background:rgba(217,164,65,.1)}
+  .name-edit{display:flex;gap:6px;align-items:center;margin-bottom:3px}
+  .name-edit input{flex:1;background:rgba(0,0,0,.32);border:1px solid var(--jade);border-radius:7px;
+    color:var(--cream);padding:5px 9px;font-family:inherit;font-size:13px}
+  .name-edit input:focus{outline:none;box-shadow:0 0 0 2px rgba(98,192,140,.18)}
+  .name-edit button{font-size:11px;padding:5px 9px;border-radius:6px;border:1px solid var(--line);
+    background:rgba(0,0,0,.25);color:var(--muted);cursor:pointer;font-family:inherit;transition:.2s;white-space:nowrap}
+  .name-edit .save{color:var(--jade);border-color:var(--agave)}
+  .name-edit .save:hover{background:rgba(98,192,140,.12)}
+  .name-edit .cancel:hover{color:var(--cream)}
   .order-row .o-amt{font-family:"Cinzel",serif;color:var(--gold-soft);text-align:right;white-space:nowrap}
   .order-row .o-amt::after{content:" Gil";font-size:10.5px;color:var(--gold);font-family:"Noto Sans TC";margin-left:2px}
   .order-row .o-claim{text-align:center}
@@ -830,6 +842,7 @@ function startOrdersFeed(){
         orders.push({ ...data, id: d.id, time: timeISO });
       });
       renderStaffWithOrders(orders);
+      window.__lastOrders = orders;
     }, err=>{
       console.error("Firestore 監聽失敗：", err);
       conn.textContent = "⚠ 後端連線失敗"; conn.className = "conn warn";
@@ -847,6 +860,7 @@ async function loadLocalForStaff(){
   const orders = await loadOrdersLocal();
   const today = todayLocalDate();
   const todayOrders = orders.filter(o => (o.time||"").slice(0,10) === today);
+  window.__lastOrders = todayOrders;
   renderStaffWithOrders(todayOrders);
 }
 
@@ -876,7 +890,7 @@ function renderStaffWithOrders(todayOrders){
         const items = (o.items||[]).map(i=>`${i.nm} ×${i.qty}`).join('、');
         return `<div class="order-row ${o.claimed?'claimed':''}" data-id="${o.id}">
           <div class="o-time">${tstr}</div>
-          <div><div class="o-cust">${escapeHtml(o.customer)||'（未具名）'}</div><div class="o-items">${items}</div></div>
+          <div><div class="o-cust" data-cust="${o.id}"><span class="cname">${escapeHtml(o.customer)||'（未具名）'}</span><button class="edit-btn" data-edit="${o.id}" title="修改客人名稱">✎</button></div><div class="o-items">${items}</div></div>
           <div class="o-amt">${gil(o.total)}</div>
           <div class="o-claim"><input type="checkbox" class="claim-chk" ${o.claimed?'checked':''} data-id="${o.id}"></div>
           <div class="o-del">
@@ -941,6 +955,45 @@ document.getElementById("orderList").addEventListener("click", async e=>{
       const row = noBtn.closest(".order-row");
       cell.innerHTML = `<button class="del-btn" data-del="${row.dataset.id}" title="刪除這筆訂單">🗑</button>`;
     }
+    return;
+  }
+});
+
+// 修改客人名稱
+document.getElementById("orderList").addEventListener("click", async e=>{
+  const editBtn = e.target.closest("[data-edit]");
+  const saveBtn = e.target.closest("[data-save-name]");
+  const cancelBtn = e.target.closest("[data-cancel-name]");
+
+  if(editBtn){
+    const id = editBtn.dataset.edit;
+    const cell = document.querySelector(`.o-cust[data-cust="${id}"]`);
+    const current = cell.querySelector(".cname").textContent.trim();
+    const orig = (current === "（未具名）") ? "" : current;
+    cell.innerHTML = `<div class="name-edit">
+      <input type="text" value="${escapeHtml(orig)}" data-name-input="${id}" placeholder="角色名 / 暱稱">
+      <button class="save" data-save-name="${id}">儲存</button>
+      <button class="cancel" data-cancel-name="${id}">取消</button>
+    </div>`;
+    const inp = cell.querySelector("input");
+    inp.focus(); inp.select();
+    inp.addEventListener("keydown", ev=>{
+      if(ev.key === "Enter") cell.querySelector("[data-save-name]").click();
+      if(ev.key === "Escape") cell.querySelector("[data-cancel-name]").click();
+    });
+    return;
+  }
+  if(saveBtn){
+    const id = saveBtn.dataset.saveName;
+    const inp = document.querySelector(`[data-name-input="${id}"]`);
+    const newName = inp.value.trim() || "（未具名客人）";
+    await patchOrder(id, { customer: newName });
+    if(!db) loadLocalForStaff();
+    return;
+  }
+  if(cancelBtn){
+    if(!db) loadLocalForStaff();
+    else renderStaffWithOrders(window.__lastOrders || []);
     return;
   }
 });
