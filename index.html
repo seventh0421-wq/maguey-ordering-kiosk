@@ -80,6 +80,38 @@
   .field input.required-empty{border-color:rgba(216,98,58,.55);background:rgba(216,98,58,.06);
     box-shadow:0 0 0 3px rgba(216,98,58,.08)}
 
+  /* 勾選框樣式 */
+  .checkbar{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
+  .ck-item{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;padding:9px 14px;
+    background:rgba(0,0,0,.22);border:1px solid var(--line);border-radius:10px;transition:.2s;flex:1;min-width:140px}
+  .ck-item:hover{border-color:var(--gold);background:rgba(217,164,65,.06)}
+  .ck-item.active{border-color:var(--jade);background:rgba(98,192,140,.09)}
+  .ck-item.active-warn{border-color:var(--ember);background:rgba(216,98,58,.09)}
+  .ck-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--jade);cursor:pointer;flex-shrink:0}
+  .ck-item.active-warn input[type=checkbox]{accent-color:var(--ember)}
+  .ck-item .ck-lab{font-size:13.5px;font-weight:600;color:var(--cream);letter-spacing:.03em}
+  .ck-item .ck-desc{font-size:11.5px;color:var(--muted);margin-top:1px}
+
+  /* 團體人數欄 */
+  .group-size-row{display:none;align-items:center;gap:10px;margin-top:10px;
+    background:rgba(98,192,140,.06);border:1px solid rgba(98,192,140,.3);border-radius:10px;padding:10px 14px}
+  .group-size-row.show{display:flex}
+  .group-size-row label{font-size:12px;letter-spacing:.1em;color:var(--jade);font-weight:700;white-space:nowrap}
+  .group-size-row .gsz{display:flex;align-items:center;gap:8px}
+  .group-size-row .gsz button{width:28px;height:28px;border-radius:7px;border:1px solid rgba(98,192,140,.4);
+    background:rgba(0,0,0,.25);color:var(--cream);cursor:pointer;font-size:16px;line-height:1;transition:.15s}
+  .group-size-row .gsz button:hover{border-color:var(--jade);color:var(--jade)}
+  .group-size-row .gsz input{width:52px;text-align:center;background:rgba(0,0,0,.28);border:1px solid rgba(98,192,140,.4);
+    border-radius:8px;color:var(--cream);padding:7px 6px;font-family:inherit;font-size:15px;font-weight:700;
+    appearance:textfield;-moz-appearance:textfield}
+  .group-size-row .gsz input::-webkit-outer-spin-button,
+  .group-size-row .gsz input::-webkit-inner-spin-button{-webkit-appearance:none}
+  .group-size-row .gsz input:focus{outline:none;border-color:var(--jade)}
+  .group-size-row .gmin-hint{font-size:12px;color:var(--jade);margin-left:4px}
+
+  /* 不領餐時隱藏菜單區 */
+  .order-area-hidden{display:none}
+
   .layout{display:grid;grid-template-columns:1fr 360px;gap:26px;align-items:start}
   @media(max-width:880px){.layout{grid-template-columns:1fr}}
 
@@ -398,13 +430,42 @@
   </div>
 
   <div class="guestbar">
-    <div class="field">
-      <label>角色名 / 暱稱</label>
-      <input id="guestName" placeholder="請留下您的稱呼…">
+    <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <div class="field">
+          <label>角色名 / 暱稱</label>
+          <input id="guestName" placeholder="請留下您的稱呼…">
+        </div>
+      </div>
+      <div class="checkbar">
+        <label class="ck-item" id="ckGroupLabel">
+          <input type="checkbox" id="ckGroup">
+          <div>
+            <div class="ck-lab">👥 團體客</div>
+            <div class="ck-desc">多人同行、由我代表統一領餐</div>
+          </div>
+        </label>
+        <label class="ck-item" id="ckNoPickupLabel">
+          <input type="checkbox" id="ckNoPickup">
+          <div>
+            <div class="ck-lab">🎟 不領餐</div>
+            <div class="ck-desc">僅付入場費，不需要餐點</div>
+          </div>
+        </label>
+      </div>
+      <div class="group-size-row" id="groupSizeRow">
+        <label>同行人數（含自己）</label>
+        <div class="gsz">
+          <button id="gszMinus" type="button">−</button>
+          <input id="groupSize" type="number" min="2" max="20" value="2">
+          <button id="gszPlus" type="button">＋</button>
+        </div>
+        <span class="gmin-hint" id="gminHint">低消 20,000 Gil</span>
+      </div>
     </div>
   </div>
 
-  <div class="layout" id="orderLayout">
+  <div class="layout" id="orderLayout" >
     <div id="menu"></div>
     <aside>
       <div class="cart">
@@ -717,28 +778,47 @@ function renderCart(){
   document.getElementById("total").textContent = gil(total);
   document.getElementById("cnt").textContent = count;
 
-  const reached = qualifying >= MIN_SPEND;
-  const topUp = hasMetMinToday(); // 今日此裝置已達低消，視為加點
-  const passMin = reached || topUp;
+  const isGroup   = document.getElementById("ckGroup").checked;
+  const noPickup  = document.getElementById("ckNoPickup").checked;
+  const groupSize = isGroup ? Math.max(2, Math.min(20, parseInt(document.getElementById("groupSize").value)||2)) : 1;
+  const minSpend  = MIN_SPEND * groupSize;
+
+  // 不領餐：隱藏菜單/點單，直接允許送出
+  const layout = document.getElementById("orderLayout");
+  layout.classList.toggle("order-area-hidden", noPickup);
+
   const nameInput = document.getElementById("guestName");
   const hasName = nameInput.value.trim().length > 0;
-  nameInput.classList.toggle("required-empty", ids.length > 0 && !hasName);
+  nameInput.classList.toggle("required-empty", !noPickup && ids.length > 0 && !hasName);
+
+  if(noPickup){
+    document.getElementById("minRow").className = "minrow ok";
+    document.getElementById("minRow").innerHTML = "🎟 不領餐・僅計入場費";
+    document.getElementById("sendBtn").disabled = !hasName;
+    return;
+  }
+
+  const reached = qualifying >= minSpend;
+  const topUp = hasMetMinToday();
+  const passMin = reached || topUp;
   const minRow = document.getElementById("minRow");
   const note = hasExcluded ? `<span class="sub">（店長今日採買不列入低消）</span>` : "";
+  const pplLabel = isGroup ? `${groupSize} 人 × 10,000` : "10,000 Gil／人";
+
   if(total === 0){
     minRow.className="minrow";
     minRow.innerHTML = topUp
-      ? `低消 ${gil(MIN_SPEND)} Gil／人<span class="sub">✓ 今日已達低消，可直接加點</span>`
-      : `低消 ${gil(MIN_SPEND)} Gil／人`;
+      ? `低消 ${gil(minSpend)} Gil（${pplLabel}）<span class="sub">✓ 今日已達低消，可直接加點</span>`
+      : `低消 ${gil(minSpend)} Gil（${pplLabel}）`;
   }else if(!hasName){
     minRow.className="minrow warn";
     minRow.innerHTML = `請先在上方輸入角色名 / 暱稱`;
   }else if(!passMin){
     minRow.className="minrow warn";
-    minRow.innerHTML = `還差 ${gil(MIN_SPEND-qualifying)} Gil 才達低消（${gil(MIN_SPEND)} Gil／人）${note}`;
+    minRow.innerHTML = `還差 ${gil(minSpend-qualifying)} Gil 才達低消（${pplLabel}＝${gil(minSpend)} Gil）${note}`;
   }else if(reached){
     minRow.className="minrow ok";
-    minRow.innerHTML = `✓ 已達低消 ${gil(MIN_SPEND)} Gil／人${note}`;
+    minRow.innerHTML = `✓ 已達低消 ${gil(minSpend)} Gil（${pplLabel}）${note}`;
   }else{
     minRow.className="minrow ok";
     minRow.innerHTML = `✓ 加點模式・今日已達低消資格${note}`;
@@ -751,15 +831,58 @@ document.getElementById("cartBody").addEventListener("click", e=>{
   if(dec){ cart[dec]--; if(cart[dec]<=0) delete cart[dec]; renderCart(); }
 });
 
+/* ====== 勾選框與團體人數互動 ====== */
+function getGroupSize(){ return Math.max(2, Math.min(20, parseInt(document.getElementById("groupSize").value)||2)); }
+function updateGroupHint(){
+  const size = getGroupSize();
+  document.getElementById("gminHint").textContent = `低消 ${gil(size * MIN_SPEND)} Gil`;
+}
+function syncCheckStyles(){
+  const isGroup  = document.getElementById("ckGroup").checked;
+  const noPickup = document.getElementById("ckNoPickup").checked;
+  document.getElementById("ckGroupLabel").className    = "ck-item" + (isGroup  ? " active" : "");
+  document.getElementById("ckNoPickupLabel").className = "ck-item" + (noPickup ? " active-warn" : "");
+  document.getElementById("groupSizeRow").classList.toggle("show", isGroup && !noPickup);
+}
+document.getElementById("ckGroup").addEventListener("change", e=>{
+  if(e.target.checked) document.getElementById("ckNoPickup").checked = false;
+  syncCheckStyles(); renderCart();
+});
+document.getElementById("ckNoPickup").addEventListener("change", e=>{
+  if(e.target.checked) document.getElementById("ckGroup").checked = false;
+  syncCheckStyles(); renderCart();
+});
+document.getElementById("gszMinus").addEventListener("click", ()=>{
+  const el = document.getElementById("groupSize");
+  el.value = Math.max(2, getGroupSize()-1);
+  updateGroupHint(); renderCart();
+});
+document.getElementById("gszPlus").addEventListener("click", ()=>{
+  const el = document.getElementById("groupSize");
+  el.value = Math.min(20, getGroupSize()+1);
+  updateGroupHint(); renderCart();
+});
+document.getElementById("groupSize").addEventListener("input", ()=>{ updateGroupHint(); renderCart(); });
+
 /* ====== 組成訂單 ====== */
 function buildOrder(){
-  const name = document.getElementById("guestName").value.trim() || "（未具名客人）";
+  const name      = document.getElementById("guestName").value.trim() || "（未具名客人）";
+  const isGroup   = document.getElementById("ckGroup").checked;
+  const noPickup  = document.getElementById("ckNoPickup").checked;
+  const groupSize = isGroup ? getGroupSize() : 1;
   const ids = Object.keys(cart).filter(id=>cart[id]>0);
   let total=0;
   const lines = ids.map(id=>{ const it=FLAT[id], sub=it.price*cart[id]; total+=sub;
     return `• ${it.nm} × ${cart[id]} ＝ ${gil(sub)} Gil`; });
-  return { name, lines, total,
-    text:`🐉 龍舌蘭咖啡廳・新訂單\n客人：${name}\n──────────\n${lines.join("\n")}\n──────────\n💰 應付總額：${gil(total)} Gil` };
+  let typeLabel = "";
+  if(noPickup)      typeLabel = "🎟 不領餐（僅付入場費）";
+  else if(isGroup)  typeLabel = `👥 團體代表領餐（${groupSize} 人）`;
+
+  return { name, lines, total, isGroup, noPickup, groupSize, typeLabel,
+    text: noPickup
+      ? `🎟 龍舌蘭咖啡廳・不領餐\n客人：${name}\n──────────\n不領餐（僅付入場費）`
+      : `🐉 龍舌蘭咖啡廳・新訂單\n客人：${name}${isGroup?`（團體代表，${groupSize} 人同行）`:""}\n──────────\n${lines.join("\n")}\n──────────\n💰 應付總額：${gil(total)} Gil`
+  };
 }
 
 /* ====== 送出至 Discord ====== */
@@ -773,22 +896,33 @@ document.getElementById("sendBtn").addEventListener("click", async ()=>{
     return;
   }
   const o = buildOrder();
-  // 二次驗算低消（防止使用者繞過按鈕）；今日已達低消過則視為加點，可放行
-  let qualifying = 0;
-  Object.keys(cart).forEach(id=>{ if(!FLAT[id].noMin) qualifying += FLAT[id].price * cart[id]; });
-  if(qualifying < MIN_SPEND && !hasMetMinToday()){ toast(`未達低消 ${gil(MIN_SPEND)} Gil／人`,"err"); return; }
-  if(qualifying >= MIN_SPEND) markMinMetToday();
+
+  // 不領餐：跳過低消驗算
+  if(!o.noPickup){
+    let qualifying = 0;
+    Object.keys(cart).forEach(id=>{ if(!FLAT[id].noMin) qualifying += FLAT[id].price * cart[id]; });
+    const minSpend = MIN_SPEND * o.groupSize;
+    if(qualifying < minSpend && !hasMetMinToday()){ toast(`未達低消 ${gil(minSpend)} Gil（${o.groupSize} 人）`,"err"); return; }
+    if(qualifying >= minSpend) markMinMetToday();
+  }
 
   const btn = document.getElementById("sendBtn"); btn.disabled=true; const old=btn.textContent; btn.textContent="🔥 傳送中…";
 
+  // 組成 Discord embed fields
+  const embedFields = [{ name:"🧑 客人", value:o.name, inline:true }];
+  if(o.typeLabel) embedFields.push({ name:"🏷 類型", value:o.typeLabel, inline:true });
+  if(!o.noPickup){
+    embedFields.push({ name:"📜 餐點明細", value:o.lines.join("\n") || "—" });
+    embedFields.push({ name:"💰 應付總額", value:`**${gil(o.total)} Gil**` });
+  }else{
+    embedFields.push({ name:"📌 備註", value:"此客人不領餐，僅付入場費，無需備餐。" });
+  }
+
   const payload = {
     username:"龍舌蘭點餐系統", avatar_url:"https://twemoji.maxcdn.com/v/latest/72x72/1f409.png",
-    embeds:[{ title:"🐉 新訂單進來囉", color:0xd8623a,
-      fields:[
-        { name:"🧑 客人", value:o.name, inline:true },
-        { name:"📜 餐點明細", value:o.lines.join("\n") || "—" },
-        { name:"💰 應付總額", value:`**${gil(o.total)} Gil**` }
-      ],
+    embeds:[{ title: o.noPickup ? "🎟 不領餐通知" : "🐉 新訂單進來囉",
+      color: o.noPickup ? 0x9fb6a8 : o.isGroup ? 0x62c08c : 0xd8623a,
+      fields: embedFields,
       footer:{ text:"龍舌蘭咖啡廳 Maguey · 讓龍們陪著我們，我們陪著龍們" }, timestamp:new Date().toISOString() }]
   };
   try{
@@ -805,6 +939,10 @@ document.getElementById("sendBtn").addEventListener("click", async ()=>{
         id: "ord_" + Date.now() + "_" + Math.random().toString(36).slice(2,7),
         time: new Date().toISOString(),
         customer: o.name,
+        isGroup: o.isGroup || false,
+        noPickup: o.noPickup || false,
+        groupSize: o.groupSize || 1,
+        typeLabel: o.typeLabel || "",
         items, total: o.total, mealTotal: mealTot, snackTotal: snackTot,
         claimed: false, updated: Date.now()
       });
@@ -1072,9 +1210,13 @@ function renderStaffWithOrders(todayOrders){
         const tt = new Date(o.time);
         const tstr = String(tt.getHours()).padStart(2,'0')+':'+String(tt.getMinutes()).padStart(2,'0');
         const items = (o.items||[]).map(i=>`${i.nm} ×${i.qty}`).join('、');
+        const badge = o.noPickup ? `<span style="font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-left:4px">🎟 不領餐</span>`
+                    : o.isGroup ? `<span style="font-size:10.5px;color:var(--jade);border:1px solid rgba(98,192,140,.4);border-radius:5px;padding:1px 6px;margin-left:4px">👥 ${o.groupSize}人團</span>`
+                    : "";
+        const itemsDisplay = o.noPickup ? `<span style="color:var(--muted);font-size:12px">不領餐（僅付入場費）</span>` : items;
         return `<div class="order-row ${o.claimed?'claimed':''}" data-id="${o.id}">
           <div class="o-time">${tstr}</div>
-          <div><div class="o-cust" data-cust="${o.id}"><span class="cname">${escapeHtml(o.customer)||'（未具名）'}</span><button class="edit-btn" data-edit="${o.id}" title="修改客人名稱">✎</button></div><div class="o-items">${items}</div></div>
+          <div><div class="o-cust" data-cust="${o.id}"><span class="cname">${escapeHtml(o.customer)||'（未具名）'}</span>${badge}<button class="edit-btn" data-edit="${o.id}" title="修改客人名稱">✎</button></div><div class="o-items">${itemsDisplay}</div></div>
           <div class="o-amt">${gil(o.total)}</div>
           <div class="o-claim"><input type="checkbox" class="claim-chk" ${o.claimed?'checked':''} data-id="${o.id}"></div>
           <div class="o-edit">
