@@ -445,13 +445,6 @@
             <div class="ck-desc">多人同行、由我代表統一領餐</div>
           </div>
         </label>
-        <label class="ck-item" id="ckNoPickupLabel">
-          <input type="checkbox" id="ckNoPickup">
-          <div>
-            <div class="ck-lab">🎟 不領餐</div>
-            <div class="ck-desc">僅付入場費，不需要餐點</div>
-          </div>
-        </label>
       </div>
       <div class="group-size-row" id="groupSizeRow">
         <label>同行人數（含自己）</label>
@@ -651,6 +644,7 @@ const MENU = [
     { id:"set_dessert", nm:"甜點套餐", desc:"甜點一份＋隨機飲品一杯。甜點依當天廚房心情隨機供應：奇妙芭菲 / 布丁布丁 / 雪頂莫古泡泡冰", price:10000 },
     { id:"set_full", nm:"吃飽套餐", desc:"主餐一份＋隨機飲品一杯。主餐依當天廚房心情隨機供應：鬆軟鬆餅 / 大河狸漢堡", price:10000 },
     { id:"set_boss", nm:"店長叫你隨便吃套餐", desc:"主餐＋甜點＋飲料各一份，你愛吃不吃。", price:15000 },
+    { id:"no_meal", nm:"不領餐・入場費", desc:"不需要餐點，僅支付入場費。團體中有人不用餐時，每人加一份即可。", price:10000, noPickup:true },
   ]},
   { cat:"龍的小零食", en:"DRAGON SNACKS", ic:"🐲", items:[
     { id:"snack", nm:"店長今日採買", desc:"當天店長採買甚麼回來，各位龍就吃甚麼。（可自選數量）", price:30000, noMin:true },
@@ -779,24 +773,12 @@ function renderCart(){
   document.getElementById("cnt").textContent = count;
 
   const isGroup   = document.getElementById("ckGroup").checked;
-  const noPickup  = document.getElementById("ckNoPickup").checked;
   const groupSize = isGroup ? Math.max(2, Math.min(20, parseInt(document.getElementById("groupSize").value)||2)) : 1;
   const minSpend  = MIN_SPEND * groupSize;
 
-  // 不領餐：隱藏菜單/點單，直接允許送出
-  const layout = document.getElementById("orderLayout");
-  layout.classList.toggle("order-area-hidden", noPickup);
-
   const nameInput = document.getElementById("guestName");
   const hasName = nameInput.value.trim().length > 0;
-  nameInput.classList.toggle("required-empty", !noPickup && ids.length > 0 && !hasName);
-
-  if(noPickup){
-    document.getElementById("minRow").className = "minrow ok";
-    document.getElementById("minRow").innerHTML = "🎟 不領餐・僅計入場費";
-    document.getElementById("sendBtn").disabled = !hasName;
-    return;
-  }
+  nameInput.classList.toggle("required-empty", ids.length > 0 && !hasName);
 
   const reached = qualifying >= minSpend;
   const topUp = hasMetMinToday();
@@ -839,17 +821,10 @@ function updateGroupHint(){
 }
 function syncCheckStyles(){
   const isGroup  = document.getElementById("ckGroup").checked;
-  const noPickup = document.getElementById("ckNoPickup").checked;
-  document.getElementById("ckGroupLabel").className    = "ck-item" + (isGroup  ? " active" : "");
-  document.getElementById("ckNoPickupLabel").className = "ck-item" + (noPickup ? " active-warn" : "");
-  document.getElementById("groupSizeRow").classList.toggle("show", isGroup && !noPickup);
+  document.getElementById("ckGroupLabel").className = "ck-item" + (isGroup ? " active" : "");
+  document.getElementById("groupSizeRow").classList.toggle("show", isGroup);
 }
 document.getElementById("ckGroup").addEventListener("change", e=>{
-  if(e.target.checked) document.getElementById("ckNoPickup").checked = false;
-  syncCheckStyles(); renderCart();
-});
-document.getElementById("ckNoPickup").addEventListener("change", e=>{
-  if(e.target.checked) document.getElementById("ckGroup").checked = false;
   syncCheckStyles(); renderCart();
 });
 document.getElementById("gszMinus").addEventListener("click", ()=>{
@@ -868,20 +843,14 @@ document.getElementById("groupSize").addEventListener("input", ()=>{ updateGroup
 function buildOrder(){
   const name      = document.getElementById("guestName").value.trim() || "（未具名客人）";
   const isGroup   = document.getElementById("ckGroup").checked;
-  const noPickup  = document.getElementById("ckNoPickup").checked;
   const groupSize = isGroup ? getGroupSize() : 1;
   const ids = Object.keys(cart).filter(id=>cart[id]>0);
   let total=0;
   const lines = ids.map(id=>{ const it=FLAT[id], sub=it.price*cart[id]; total+=sub;
     return `• ${it.nm} × ${cart[id]} ＝ ${gil(sub)} Gil`; });
-  let typeLabel = "";
-  if(noPickup)      typeLabel = "🎟 不領餐（僅付入場費）";
-  else if(isGroup)  typeLabel = `👥 團體代表領餐（${groupSize} 人）`;
-
-  return { name, lines, total, isGroup, noPickup, groupSize, typeLabel,
-    text: noPickup
-      ? `🎟 龍舌蘭咖啡廳・不領餐\n客人：${name}\n──────────\n不領餐（僅付入場費）`
-      : `🐉 龍舌蘭咖啡廳・新訂單\n客人：${name}${isGroup?`（團體代表，${groupSize} 人同行）`:""}\n──────────\n${lines.join("\n")}\n──────────\n💰 應付總額：${gil(total)} Gil`
+  const typeLabel = isGroup ? `👥 團體代表領餐（${groupSize} 人）` : "";
+  return { name, lines, total, isGroup, groupSize, typeLabel,
+    text:`🐉 龍舌蘭咖啡廳・新訂單\n客人：${name}${isGroup?`（團體代表，${groupSize} 人同行）`:""}\n──────────\n${lines.join("\n")}\n──────────\n💰 應付總額：${gil(total)} Gil`
   };
 }
 
@@ -896,32 +865,24 @@ document.getElementById("sendBtn").addEventListener("click", async ()=>{
     return;
   }
   const o = buildOrder();
-
-  // 不領餐：跳過低消驗算
-  if(!o.noPickup){
-    let qualifying = 0;
-    Object.keys(cart).forEach(id=>{ if(!FLAT[id].noMin) qualifying += FLAT[id].price * cart[id]; });
-    const minSpend = MIN_SPEND * o.groupSize;
-    if(qualifying < minSpend && !hasMetMinToday()){ toast(`未達低消 ${gil(minSpend)} Gil（${o.groupSize} 人）`,"err"); return; }
-    if(qualifying >= minSpend) markMinMetToday();
-  }
+  // 二次驗算低消；今日已達過則視為加點
+  let qualifying = 0;
+  Object.keys(cart).forEach(id=>{ if(!FLAT[id].noMin) qualifying += FLAT[id].price * cart[id]; });
+  const minSpend = MIN_SPEND * o.groupSize;
+  if(qualifying < minSpend && !hasMetMinToday()){ toast(`未達低消 ${gil(minSpend)} Gil（${o.groupSize} 人）`,"err"); return; }
+  if(qualifying >= minSpend) markMinMetToday();
 
   const btn = document.getElementById("sendBtn"); btn.disabled=true; const old=btn.textContent; btn.textContent="🔥 傳送中…";
 
-  // 組成 Discord embed fields
   const embedFields = [{ name:"🧑 客人", value:o.name, inline:true }];
   if(o.typeLabel) embedFields.push({ name:"🏷 類型", value:o.typeLabel, inline:true });
-  if(!o.noPickup){
-    embedFields.push({ name:"📜 餐點明細", value:o.lines.join("\n") || "—" });
-    embedFields.push({ name:"💰 應付總額", value:`**${gil(o.total)} Gil**` });
-  }else{
-    embedFields.push({ name:"📌 備註", value:"此客人不領餐，僅付入場費，無需備餐。" });
-  }
+  embedFields.push({ name:"📜 餐點明細", value:o.lines.join("\n") || "—" });
+  embedFields.push({ name:"💰 應付總額", value:`**${gil(o.total)} Gil**` });
 
   const payload = {
     username:"龍舌蘭點餐系統", avatar_url:"https://twemoji.maxcdn.com/v/latest/72x72/1f409.png",
-    embeds:[{ title: o.noPickup ? "🎟 不領餐通知" : "🐉 新訂單進來囉",
-      color: o.noPickup ? 0x9fb6a8 : o.isGroup ? 0x62c08c : 0xd8623a,
+    embeds:[{ title:"🐉 新訂單進來囉",
+      color: o.isGroup ? 0x62c08c : 0xd8623a,
       fields: embedFields,
       footer:{ text:"龍舌蘭咖啡廳 Maguey · 讓龍們陪著我們，我們陪著龍們" }, timestamp:new Date().toISOString() }]
   };
@@ -940,7 +901,6 @@ document.getElementById("sendBtn").addEventListener("click", async ()=>{
         time: new Date().toISOString(),
         customer: o.name,
         isGroup: o.isGroup || false,
-        noPickup: o.noPickup || false,
         groupSize: o.groupSize || 1,
         typeLabel: o.typeLabel || "",
         items, total: o.total, mealTotal: mealTot, snackTotal: snackTot,
@@ -1210,10 +1170,8 @@ function renderStaffWithOrders(todayOrders){
         const tt = new Date(o.time);
         const tstr = String(tt.getHours()).padStart(2,'0')+':'+String(tt.getMinutes()).padStart(2,'0');
         const items = (o.items||[]).map(i=>`${i.nm} ×${i.qty}`).join('、');
-        const badge = o.noPickup ? `<span style="font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-left:4px">🎟 不領餐</span>`
-                    : o.isGroup ? `<span style="font-size:10.5px;color:var(--jade);border:1px solid rgba(98,192,140,.4);border-radius:5px;padding:1px 6px;margin-left:4px">👥 ${o.groupSize}人團</span>`
-                    : "";
-        const itemsDisplay = o.noPickup ? `<span style="color:var(--muted);font-size:12px">不領餐（僅付入場費）</span>` : items;
+        const badge = o.isGroup ? `<span style="font-size:10.5px;color:var(--jade);border:1px solid rgba(98,192,140,.4);border-radius:5px;padding:1px 6px;margin-left:4px">👥 ${o.groupSize}人團</span>` : "";
+        const itemsDisplay = items;
         return `<div class="order-row ${o.claimed?'claimed':''}" data-id="${o.id}">
           <div class="o-time">${tstr}</div>
           <div><div class="o-cust" data-cust="${o.id}"><span class="cname">${escapeHtml(o.customer)||'（未具名）'}</span>${badge}<button class="edit-btn" data-edit="${o.id}" title="修改客人名稱">✎</button></div><div class="o-items">${itemsDisplay}</div></div>
