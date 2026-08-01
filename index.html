@@ -164,7 +164,12 @@
   .qty button{width:24px;height:24px;border-radius:7px;border:1px solid var(--line);background:rgba(0,0,0,.3);
     color:var(--cream);cursor:pointer;font-size:15px;line-height:1;transition:.15s;}
   .qty button:hover{border-color:var(--jade);color:var(--jade)}
-  .qty span{min-width:18px;text-align:center;font-weight:700;font-size:14px}
+  .qty input[type=number]{width:40px;text-align:center;background:rgba(0,0,0,.28);border:1px solid var(--line);
+    border-radius:7px;color:var(--cream);padding:3px 4px;font-family:inherit;font-weight:700;font-size:14px;
+    appearance:textfield;-moz-appearance:textfield;transition:.2s}
+  .qty input[type=number]::-webkit-outer-spin-button,
+  .qty input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+  .qty input[type=number]:focus{outline:none;border-color:var(--jade);box-shadow:0 0 0 2px rgba(98,192,140,.18)}
   .ci-price{min-width:80px;text-align:right;font-family:"Cinzel",serif;color:var(--gold-soft);font-size:13px;white-space:nowrap}
   .cart-foot{padding:16px 20px;border-top:1px solid var(--gold)}
   .minrow{font-size:12.5px;text-align:center;margin-bottom:11px;color:var(--muted);letter-spacing:.03em;line-height:1.5}
@@ -764,7 +769,7 @@ function renderCart(){
       const it=FLAT[id], sub=it.price*cart[id];
       return `<div class="citem">
         <div class="ci-nm">${it.nm}<small>${gil(it.price)} Gil${it.noMin?' · 不列入低消':''}</small></div>
-        <div class="qty"><button data-d="${id}">−</button><span>${cart[id]}</span><button data-i="${id}">＋</button></div>
+        <div class="qty"><button data-d="${id}">−</button><input type="number" min="1" max="99" value="${cart[id]}" data-q="${id}"><button data-i="${id}">＋</button></div>
         <div class="ci-price">${gil(sub)} Gil</div>
       </div>`;
     }).join("");
@@ -808,9 +813,16 @@ function renderCart(){
   document.getElementById("sendBtn").disabled = !ids.length || !passMin || !hasName;
 }
 document.getElementById("cartBody").addEventListener("click", e=>{
-  const inc=e.target.dataset.i, dec=e.target.dataset.d;
-  if(inc){ cart[inc]++; renderCart(); }
-  if(dec){ cart[dec]--; if(cart[dec]<=0) delete cart[dec]; renderCart(); }
+  const inc=e.target.closest("[data-i]"), dec=e.target.closest("[data-d]");
+  if(inc){ const id=inc.dataset.i; cart[id]=(cart[id]||0)+1; renderCart(); }
+  if(dec){ const id=dec.dataset.d; cart[id]=(cart[id]||0)-1; if(cart[id]<=0) delete cart[id]; renderCart(); }
+});
+document.getElementById("cartBody").addEventListener("change", e=>{
+  const inp = e.target.closest("[data-q]"); if(!inp) return;
+  const id = inp.dataset.q;
+  const val = Math.max(0, Math.min(99, parseInt(inp.value)||0));
+  if(val === 0) delete cart[id]; else cart[id] = val;
+  renderCart();
 });
 
 /* ====== 勾選框與團體人數互動 ====== */
